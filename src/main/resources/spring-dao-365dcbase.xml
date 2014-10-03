@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+     http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+     http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.1.xsd
+     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd">
+
+
+      <bean id="dcBaseDataSource" class="org.apache.tomcat.jdbc.pool.DataSource">
+        <qualifier value="dc_base_ds"/>
+        <property name="testOnBorrow" value="true"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnReturn" value="false"/>
+        <property name="timeBetweenEvictionRunsMillis" value="30000"/>
+        <property name="minEvictableIdleTimeMillis" value="30000"/>
+        <property name="jdbcInterceptors" value="org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer"/>
+        <property name="driverClassName" value="${dcbase_db.driver_class}"/>
+        <property name="maxActive" value="${dcbase_db.max_active}"/>
+        <property name="maxWait" value="${dcbase_db.max_wait}"/>
+        <property name="minIdle" value="${dcbase_db.min_idle}"/>
+        <property name="initialSize" value="${dcbase_db.min_size}"/>
+        <property name="username" value="${dcbase_db.username}"/>
+        <property name="password" value="${dcbase_db.password}"/>
+        <property name="url" value="${dcbase_db.connection_url}"/>
+        <property name="validationQuery" value="${dcbase_db.validation_query}"/>
+        <property name="validationInterval" value="${dcbase_db.validation_interval}"/>
+        <property name="removeAbandoned" value="true"/>
+        <property name="removeAbandonedTimeout" value="60" />
+        <property name="logAbandoned" value="false"/>
+    </bean>
+    
+    <bean id="dcBaseSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <qualifier value="dc_base_sf" />
+        <property name="configLocation" value="classpath:mybatis-config.xml"></property>
+        <property name="dataSource" ref="dcBaseDataSource"/>
+        <property name="mapperLocations" value="classpath:sqlmapper/**/*.xml" />
+    </bean>
+    
+    <bean id="dcBaseTxManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dcBaseDataSource" />
+        <qualifier value="dc_base_tx"/>
+    </bean>
+    
+    <tx:annotation-driven transaction-manager="dcBaseTxManager" /> 
+    
+<!--     <bean name="dcBaseMapperScannerConfigurer" 
+          class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.uuola.diancai.mapper,com.uuola.diancai.backend.mapper,com.uuola.diancai.frontend.mapper" />
+        <property name="sqlSessionFactoryBeanName" value="dcBaseSqlSessionFactory"/>
+    </bean> -->
+    
+    
+</beans>
