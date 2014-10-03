@@ -20,7 +20,7 @@ import com.uuola.commons.JsonUtil;
 import com.uuola.commons.constant.CST_ENCODING;
 
 /**
- *
+ * MVC视图JSON转换
  * @author txdnet
  */
 public class MappingFastJsonView extends AbstractView {
