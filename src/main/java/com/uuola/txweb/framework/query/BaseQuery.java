@@ -22,11 +22,14 @@ public abstract class BaseQuery extends ValidateDTO implements Serializable {
 
     private static final long serialVersionUID = 6592438136405632705L;
 
+   // 当前页码
+    private Integer pageNo;
+    
     // 当前排号
     protected Integer crow;
     
     // 列表显示记录数
-    protected Integer listsize;
+    protected Integer listSize;
     
     // 查询总记录数
     protected Integer records;
@@ -42,12 +45,12 @@ public abstract class BaseQuery extends ValidateDTO implements Serializable {
      */
     abstract public void filter();
 
-    protected BaseQuery() {
+    public BaseQuery() {
         if (crow == null) {
             crow = 0;
         }
-        if (listsize == null || listsize > 100) {
-            listsize = 20;
+        if (listSize == null || listSize > 100) {
+            listSize = 20;
         }
         if (records == null) {
             records = 0;
@@ -71,15 +74,15 @@ public abstract class BaseQuery extends ValidateDTO implements Serializable {
     /**
      * @return the listsize
      */
-    public Integer getListsize() {
-        return listsize;
+    public Integer getListSize() {
+        return listSize;
     }
 
     /**
      * @param listsize the listsize to set
      */
-    public void setListsize(Integer listsize) {
-        this.listsize = listsize;
+    public void setListSize(Integer listSize) {
+        this.listSize = listSize;
     }
 
     
@@ -111,5 +114,16 @@ public abstract class BaseQuery extends ValidateDTO implements Serializable {
     public void setRecords(Integer records) {
         this.records = records;
     }
+
+    
+    public Integer getPageNo() {
+        return pageNo;
+    }
+
+    
+    public void setPageNo(Integer pageNo) {
+        this.pageNo = pageNo;
+    }
+    
  
 }

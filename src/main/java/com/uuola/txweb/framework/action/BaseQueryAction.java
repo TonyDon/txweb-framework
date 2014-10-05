@@ -60,7 +60,7 @@ public abstract class BaseQueryAction extends BaseAction{
     
     private <T> void preHandlerQuery(BaseQuery query, JqGridModel<T> model){
         query.setCrow(model.getCurrRow());
-        query.setListsize(model.getRows());
+        query.setListSize(model.getRows());
         query.setSord(model.getSord());
         query.setSidx(model.getSidx());
     }
