@@ -13,6 +13,5 @@
 	<context:annotation-config />
 	<import resource="classpath:spring-property.xml" />
 	<import resource="classpath:spring-dao.xml" />
-	<import resource="classpath:spring-interceptor.xml" />
 
 </beans>
