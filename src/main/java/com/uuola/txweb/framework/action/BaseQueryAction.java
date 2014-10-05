@@ -34,13 +34,13 @@ import com.uuola.txweb.framework.query.BaseQuery;
  * <pre>
  * 支持jquery grid的查询基类
  * 继承该类后只能实现query方法和覆盖父类的方法
- * @param <Q> 页面查询条件 继承BaseQuery
- * @param <T> 封装需要返回客户端的数据，最终返回的数据由该类型对象的get和is方法确定
+ * 页面查询条件 继承BaseQuery
+ * 封装需要返回客户端的数据，最终返回的数据由该类型对象的get和is方法确定
  * @author tangxiaodong
  * 创建日期: 2013-6-23
  * </pre>
  */
-public abstract class BaseQueryAction<Q extends BaseQuery, T> extends BaseAction{
+public abstract class BaseQueryAction extends BaseAction{
     
 
     
@@ -58,7 +58,7 @@ public abstract class BaseQueryAction<Q extends BaseQuery, T> extends BaseAction
         return false;
     }
     
-    private void preHandlerQuery(BaseQuery query, JqGridModel<T> model){
+    private <T> void preHandlerQuery(BaseQuery query, JqGridModel<T> model){
         query.setCrow(model.getCurrRow());
         query.setListsize(model.getRows());
         query.setSord(model.getSord());
@@ -73,8 +73,8 @@ public abstract class BaseQueryAction<Q extends BaseQuery, T> extends BaseAction
      * @throws IOException 
      */
     @RequestMapping(value="/query", method = RequestMethod.GET)
-    public void list(
-            Q query, 
+    public <T> void list(
+            BaseQuery query, 
             @ModelAttribute("model") JqGridModel<T> model, 
             @ModelAttribute(ERRORS_ATTR) ArrayList<String> errors, 
             ServletWebRequest webRequest) {
@@ -106,7 +106,7 @@ public abstract class BaseQueryAction<Q extends BaseQuery, T> extends BaseAction
      * @param model
      */
     @RequestMapping(value = "/search", method = RequestMethod.GET)
-    public void search(Q query, 
+    public void search(BaseQuery query, 
             @ModelAttribute(ERRORS_ATTR)ArrayList<String> errors, 
             ServletWebRequest webRequest, Model model) {
         if (!preValidQuery(query, errors)) {
@@ -127,14 +127,14 @@ public abstract class BaseQueryAction<Q extends BaseQuery, T> extends BaseAction
         }
     }
     
-    private void toModel(PageDTO pageDto, JqGridModel<T> model){
+    private <T> void toModel(PageDTO pageDto, JqGridModel<T> model){
         List<T> rows = parseViewDto(pageDto.getData());
         model.setRowDatas(rows);
         model.setRecords(pageDto.getTotalCount());
     }
     
     @SuppressWarnings({"unchecked","rawtypes"})
-    protected List<T> parseViewDto(Collection data){
+    protected <T> List<T> parseViewDto(Collection data){
         if (data == null || data.isEmpty()) {
             return Collections.emptyList();
         }
@@ -151,7 +151,7 @@ public abstract class BaseQueryAction<Q extends BaseQuery, T> extends BaseAction
         return (List<T>)data;
     }
     
-    protected T newModel() {
+    protected <T> T newModel() {
         Class<T> t = getModelClass();
         try {
             return t.newInstance();
@@ -165,7 +165,7 @@ public abstract class BaseQueryAction<Q extends BaseQuery, T> extends BaseAction
      * @return
      */
     @SuppressWarnings("unchecked")
-    protected Class<T> getModelClass() {    
+    protected <T> Class<T> getModelClass() {    
             ParameterizedType pt = (ParameterizedType) this.getClass().getGenericSuperclass();
             return (Class<T>) pt.getActualTypeArguments()[1];
     }
@@ -176,6 +176,6 @@ public abstract class BaseQueryAction<Q extends BaseQuery, T> extends BaseAction
      * @param model
      * @return
      */
-    protected abstract PageDTO query(Q query);
+    protected abstract PageDTO query(BaseQuery query);
  
 }
