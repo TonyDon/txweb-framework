@@ -82,7 +82,11 @@ public abstract class BaseQuery extends ValidateDTO implements Serializable {
      * @param listsize the listsize to set
      */
     public void setListSize(Integer listSize) {
-        this.listSize = listSize;
+        if (listSize == null || listSize > 100) {
+            this.listSize = 20;
+        } else {
+            this.listSize = listSize;
+        }
     }
 
     
