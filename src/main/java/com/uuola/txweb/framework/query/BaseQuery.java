@@ -46,10 +46,10 @@ public abstract class BaseQuery extends ValidateDTO implements Serializable {
         if (crow == null) {
             crow = 0;
         }
-        if (listsize == null) {
+        if (listsize == null || listsize > 100) {
             listsize = 20;
         }
-        if(records == null){
+        if (records == null) {
             records = 0;
         }
     }
