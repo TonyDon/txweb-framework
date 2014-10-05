@@ -129,5 +129,12 @@ public abstract class BaseQuery extends ValidateDTO implements Serializable {
         this.pageNo = pageNo;
     }
     
- 
+    /**
+     * 计算当前记录行号
+     */
+    public void calcCurrRowIndex() {
+        if (null != pageNo && pageNo > 0) {
+            this.crow = this.listSize * (this.pageNo - 1);
+        }
+    }
 }

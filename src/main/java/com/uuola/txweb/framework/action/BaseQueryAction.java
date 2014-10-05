@@ -72,30 +72,30 @@ public abstract class BaseQueryAction extends BaseAction{
      * @param model
      * @throws IOException 
      */
-    @RequestMapping(value="/query", method = RequestMethod.GET)
-    public <T> void list(
-            BaseQuery query, 
-            @ModelAttribute("model") JqGridModel<T> model, 
-            @ModelAttribute(ERRORS_ATTR) ArrayList<String> errors, 
-            ServletWebRequest webRequest) {
-        if (!preValidQuery(query, errors)) {
-            webRequest.getResponse().setStatus(HTTP_STATUS_CODE.SC_BAD_REQUEST);
-            return;
-        }
-        preHandlerQuery(query, model);
-        query.filter();
-        try {
-            PageDTO pageDTO = query(query);
-            toModel(pageDTO, model);
-        } catch (BusinessException be) {
-            errors.add(BusinessExceptionMessageProvider.getMessage(be));
-        } catch (Exception e) {
-            errors.add(ExceptionUtils.getFullStackTrace(e));
-        }
-        if(!errors.isEmpty()){
-            webRequest.getResponse().setStatus(HTTP_STATUS_CODE.SC_BZ_ERROR);
-        }
-    }
+//    @RequestMapping(value="/query", method = RequestMethod.GET)
+//    public <T> void list(
+//            BaseQuery query, 
+//            @ModelAttribute("model") JqGridModel<T> model, 
+//            @ModelAttribute(ERRORS_ATTR) ArrayList<String> errors, 
+//            ServletWebRequest webRequest) {
+//        if (!preValidQuery(query, errors)) {
+//            webRequest.getResponse().setStatus(HTTP_STATUS_CODE.SC_BAD_REQUEST);
+//            return;
+//        }
+//        preHandlerQuery(query, model);
+//        query.filter();
+//        try {
+//            PageDTO pageDTO = query(query);
+//            toModel(pageDTO, model);
+//        } catch (BusinessException be) {
+//            errors.add(BusinessExceptionMessageProvider.getMessage(be));
+//        } catch (Exception e) {
+//            errors.add(ExceptionUtils.getFullStackTrace(e));
+//        }
+//        if(!errors.isEmpty()){
+//            webRequest.getResponse().setStatus(HTTP_STATUS_CODE.SC_BZ_ERROR);
+//        }
+//    }
     
     /**
      * jsTable通用列表<br/>
@@ -105,27 +105,28 @@ public abstract class BaseQueryAction extends BaseAction{
      * @param webRequest
      * @param model
      */
-    @RequestMapping(value = "/search", method = RequestMethod.GET)
-    public void search(BaseQuery query, 
-            @ModelAttribute(ERRORS_ATTR)ArrayList<String> errors, 
-            ServletWebRequest webRequest, Model model) {
-        if (!preValidQuery(query, errors)) {
-            webRequest.getResponse().setStatus(HTTP_STATUS_CODE.SC_BAD_REQUEST);
-            return;
-        }
-        query.filter();
-        try {
-            PageDTO pageDTO = query(query);
-            model.addAttribute("page", pageDTO);
-        } catch (BusinessException be) {
-            errors.add(BusinessExceptionMessageProvider.getMessage(be));
-        } catch (Exception e) {
-            errors.add(ExceptionUtils.getFullStackTrace(e));
-        }
-        if (!errors.isEmpty()) {
-            webRequest.getResponse().setStatus(HTTP_STATUS_CODE.SC_BZ_ERROR);
-        }
-    }
+//    @RequestMapping(value = "/search", method = RequestMethod.GET)
+//    public void search(BaseQuery query, 
+//            @ModelAttribute(ERRORS_ATTR)ArrayList<String> errors, 
+//            ServletWebRequest webRequest, Model model) {
+//        if (!preValidQuery(query, errors)) {
+//            webRequest.getResponse().setStatus(HTTP_STATUS_CODE.SC_BAD_REQUEST);
+//            return;
+//        }
+//        query.filter();
+//        query.calcCurrRowIndex();
+//        try {
+//            PageDTO pageDTO = query(query);
+//            model.addAttribute("page", pageDTO);
+//        } catch (BusinessException be) {
+//            errors.add(BusinessExceptionMessageProvider.getMessage(be));
+//        } catch (Exception e) {
+//            errors.add(ExceptionUtils.getFullStackTrace(e));
+//        }
+//        if (!errors.isEmpty()) {
+//            webRequest.getResponse().setStatus(HTTP_STATUS_CODE.SC_BZ_ERROR);
+//        }
+//    }
     
     private <T> void toModel(PageDTO pageDto, JqGridModel<T> model){
         List<T> rows = parseViewDto(pageDto.getData());
@@ -176,6 +177,6 @@ public abstract class BaseQueryAction extends BaseAction{
      * @param model
      * @return
      */
-    protected abstract PageDTO query(BaseQuery query);
+//    protected abstract PageDTO query(BaseQuery query);
  
 }

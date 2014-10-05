@@ -33,7 +33,7 @@ public class WebAppExceptionResolver implements HandlerExceptionResolver {
             Exception ex) {
         response.setStatus(HTTP_STATUS_CODE.SC_BZ_ERROR);
         ModelAndView model = new ModelAndView();
-        model.addObject("exception", ExceptionUtils.getRootCauseMessage(ex));
+        model.addObject("exception", ExceptionUtils.getFullStackTrace(ex));
         model.setViewName("exception/index");
         return model;
     }
