@@ -49,8 +49,8 @@ public abstract class BaseAction{
     public BaseAction() {
         this.viewPrefixName = getPackagePath().concat(CST_CHAR.STR_SLASH).concat(getActionPrefixName())
                 .concat(CST_CHAR.STR_LINE);
-        if (log.isDebugEnabled()) {
-            log.debug("viewPrefixName:" + this.viewPrefixName);
+        if (log.isInfoEnabled()) {
+            log.info("viewPrefixName:" + this.viewPrefixName);
         }
     }
     
