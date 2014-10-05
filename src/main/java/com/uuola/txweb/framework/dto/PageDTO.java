@@ -14,7 +14,7 @@ import java.util.Map;
 
 /**
  * <pre>
- *
+ * 用于页面记录展示，DataGrid处理
  * @author tangxiaodong
  * 创建日期: 2013-6-23
  * </pre>
