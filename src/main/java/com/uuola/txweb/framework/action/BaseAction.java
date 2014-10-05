@@ -42,6 +42,19 @@ public abstract class BaseAction{
     protected static final String ERRORS_ATTR = "errors";
     
     /**
+     * 视图前缀 com/uuola/txcms/action/${actionPrefixName}-
+     */
+    protected String viewPrefixName ;
+    
+    public BaseAction() {
+        this.viewPrefixName = getPackagePath().concat(CST_CHAR.STR_SLASH).concat(getActionPrefixName())
+                .concat(CST_CHAR.STR_LINE);
+        if (log.isDebugEnabled()) {
+            log.debug("viewPrefixName:" + this.viewPrefixName);
+        }
+    }
+    
+    /**
      * 如果使用<mvc:annotation-driven /> 则使用该方法初始化绑定
      * @param request
      * @param binder
@@ -100,9 +113,7 @@ public abstract class BaseAction{
      * @return
      */
     protected String getViewName(String methodName){
-        return getPackagePath()
-                .concat(CST_CHAR.STR_SLASH)
-                .concat(getActionPrefixName().concat(CST_CHAR.STR_LINE).concat(methodName));
+        return viewPrefixName.concat(methodName);
     }
     
 
