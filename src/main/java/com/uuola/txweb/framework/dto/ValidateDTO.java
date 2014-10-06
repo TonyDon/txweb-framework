@@ -64,8 +64,4 @@ public abstract class ValidateDTO implements Serializable {
     public boolean isValidPass() {
         return validPass;
     }
-    
-    public boolean notValidPass(){
-        return !this.validPass;
-    }
 }

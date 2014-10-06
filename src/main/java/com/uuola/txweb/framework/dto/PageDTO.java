@@ -23,42 +23,50 @@ public class PageDTO implements Serializable {
 
     private static final long serialVersionUID = -4153700948568583441L;
 
+    /**
+     * 当前记录集合
+     */
     @SuppressWarnings("rawtypes")
-    private Collection data;
+    private Collection datas;
 
-    private int totalCount;
+    /**
+     * 总记录数
+     */
+    private int total;
 
+    /**
+     * 扩展数据集合
+     */
     private Map<String, Object> extraInfo;
 
-    public PageDTO() {
-    }
+    public PageDTO() {}
 
     @SuppressWarnings("rawtypes")
-    public PageDTO(Collection data, int totalCount) {
-        if (data == null) {
-            this.data = Collections.emptyList();
+    public PageDTO(Collection datas, int total) {
+        if (datas == null) {
+            this.datas = Collections.emptyList();
         }
-        this.data = data;
-        this.totalCount = totalCount;
+        this.datas = datas;
+        this.total = total;
     }
 
-    public PageDTO(Object[] data, int totalCount) {
-        if (data == null) {
-            this.data = Collections.emptyList();
+    public PageDTO(Object[] datas, int total) {
+        if (datas == null) {
+            this.datas = Collections.emptyList();
             return;
         }
-        this.data = Arrays.asList(data);
-        this.totalCount = totalCount;
+        this.datas = Arrays.asList(datas);
+        this.total = total;
     }
 
     @SuppressWarnings("rawtypes")
-    public Collection getData() {
-        return data;
+    public Collection getDatas() {
+        return datas;
     }
 
     @SuppressWarnings("rawtypes")
-    public void setData(Collection data) {
-        this.data = data;
+    public void setDatas(Collection datas) {
+        this.datas = datas;
     }
 
     public Map<String, Object> getExtraInfo() {
@@ -70,13 +78,13 @@ public class PageDTO implements Serializable {
     }
 
     
-    public int getTotalCount() {
-        return totalCount;
+    public int getTotal() {
+        return total;
     }
 
     
-    public void setTotalCount(int totalCount) {
-        this.totalCount = totalCount;
+    public void setTotal(int total) {
+        this.total = total;
     }
     
 }
