@@ -45,7 +45,7 @@ public abstract class BaseQueryAction extends BaseAction {
      */
     protected ModelAndView executeQuery(ServletWebRequest webRequest, BaseQuery query, QueryCallbackHandler handler) {
         ModelAndView model = new ModelAndView();
-        List<String> errors = new ArrayList<String>(2);
+        List<String> errors = new ArrayList<String>();
         if (query.validatePass()) {
             try {
                 // 执行查询条件过滤方法，如非法值过滤，默认条件设置, 值转换等
