@@ -31,15 +31,19 @@ public abstract class BaseQueryAction extends BaseAction {
 
     // 页面使用PageDTO的属性名称 如: page.datas , page.total
     protected final String QUERY_PAGE_ATTR = "page";
-    
+
     /**
      * 封装查询过程
-     * @param query 查询条件
-     * @param handler 查询处理外部回调执行者
-     * @param webRequest 当前Request
+     * 
+     * @param query
+     *            查询条件
+     * @param handler
+     *            查询处理外部回调执行者
+     * @param webRequest
+     *            当前Request
      * @return
      */
-    protected ModelAndView executeQuery(BaseQuery query, QueryCallbackHandler handler, ServletWebRequest webRequest) {
+    protected ModelAndView executeQuery(ServletWebRequest webRequest, BaseQuery query, QueryCallbackHandler handler) {
         ModelAndView model = new ModelAndView();
         List<String> errors = new ArrayList<String>(2);
         if (query.validatePass()) {
