@@ -4,8 +4,10 @@
  */
 package com.uuola.txweb.framework.utils;
 
+import com.uuola.commons.CollectionUtil;
 import com.uuola.txweb.framework.dto.ValidateDTO;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import javax.validation.ConstraintViolation;
@@ -47,10 +49,13 @@ public class ValidateUtil {
      * @return
      */
     public static List<String> getErrorList(Set<ConstraintViolation<ValidateDTO>> validSet) {
-        List<String> errors = new ArrayList<String>();
-        for (ConstraintViolation<?> cv : validSet) {
-            errors.add(String.format(cv.getMessage(), cv.getInvalidValue()));
+        if (CollectionUtil.isNotEmpty(validSet)) {
+            List<String> errors = new ArrayList<String>(validSet.size());
+            for (ConstraintViolation<ValidateDTO> cv : validSet) {
+                errors.add(String.format(cv.getMessage(), cv.getInvalidValue()));
+            }
+            return errors;
         }
-        return errors;
+        return Collections.emptyList();
     }
 }

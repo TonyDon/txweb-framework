@@ -30,12 +30,8 @@ public abstract class ValidateDTO implements Serializable {
      * @return
      */
     public boolean validatePass() {
-        if (CollectionUtils.isEmpty(validSet)) {
-            validSet = ValidateUtil.validate(this);
-        } else {
-            validSet.addAll(ValidateUtil.validate(this));
-        }
-        this.validPass = validSet.isEmpty();
+        validSet = ValidateUtil.validate(this);
+        validPass = validSet.isEmpty();
         return validPass;
     }
 
@@ -50,7 +46,7 @@ public abstract class ValidateDTO implements Serializable {
         } else {
             validSet.addAll(ValidateUtil.validateProperty(this, propertyName));
         }
-        this.validPass = validSet.isEmpty();
+        validPass = validSet.isEmpty();
         return validPass;
     }
 
