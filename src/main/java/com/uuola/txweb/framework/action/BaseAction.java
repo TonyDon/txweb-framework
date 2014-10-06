@@ -28,6 +28,7 @@ import com.uuola.txweb.framework.utils.ValidateUtil;
 
 /**
  * <pre>
+ * 抽象Action类，子类名称要求以*Action命名，Action 类所在包路径以/action结束
  * @author tangxiaodong
  * 创建日期: 2013-6-12
  * </pre>
@@ -42,12 +43,15 @@ public abstract class BaseAction{
     protected static final String ERRORS_ATTR = "errors";
     
     /**
-     * 视图前缀 com/uuola/txcms/action/${actionPrefixName}-
+     * 根据包路径和Action类构建视图名路径，如：
+     * com.uuola.txcms.portal.user.action.UserInfoAction
+     * 转为 ： com/uuola/txcms/portal/user/${actionPrefixName}-${methodName/otherName}
      */
     protected String viewPrefixName ;
     
     public BaseAction() {
-        this.viewPrefixName = getPackagePath().concat(CST_CHAR.STR_SLASH).concat(getActionPrefixName())
+        String viewPath = StringUtil.replace(getPackagePath(), "/action", CST_CHAR.STR_EMPTY);
+        this.viewPrefixName = viewPath.concat(CST_CHAR.STR_SLASH).concat(getActionPrefixName())
                 .concat(CST_CHAR.STR_LINE);
         if (log.isInfoEnabled()) {
             log.info("viewPrefixName:" + this.viewPrefixName);
@@ -84,7 +88,7 @@ public abstract class BaseAction{
      * eg : DemoHelloAction -> demoHello
      * @return
      */
-    protected String getActionPrefixName(){
+    private String getActionPrefixName(){
         String className = this.getClass().getSimpleName();
         int actionIdx = className.indexOf("Action");
         if(actionIdx<1){
@@ -96,10 +100,10 @@ public abstract class BaseAction{
     
     /**
      * 转换包名称为目录路径<br/>
-     * eg: com.uuola.txweb -> com/uuola/txweb
+     * eg: com.uuola.txweb.action → com/uuola/txweb/action
      * @return
      */
-    protected String getPackagePath(){
+    private String getPackagePath(){
        String packageName = this.getClass().getPackage().getName();
        TxAssert.hasLength(packageName);
        return StringUtil.replace(packageName, CST_CHAR.STR_DOT, CST_CHAR.STR_SLASH);
