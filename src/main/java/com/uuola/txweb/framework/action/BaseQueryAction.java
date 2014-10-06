@@ -43,11 +43,12 @@ public abstract class BaseQueryAction extends BaseAction {
         ModelAndView model = new ModelAndView();
         List<String> errors = new ArrayList<String>(2);
         if (query.validatePass()) {
-            // 执行查询条件过滤方法，如非法值过滤，默认条件设置
-            query.filter();
-            // 执行分页查询记录行计算
-            query.calcCurrRowIndex();
             try {
+                // 执行查询条件过滤方法，如非法值过滤，默认条件设置, 值转换等
+                query.filter();
+                // 执行分页查询记录行计算
+                query.calcCurrRowIndex();
+                // 查询返回PageDTO对象
                 PageDTO pageDTO = handler.doQuery(query);
                 model.addObject(QUERY_PAGE_ATTR, pageDTO);
             } catch (BusinessException be) {
@@ -58,7 +59,6 @@ public abstract class BaseQueryAction extends BaseAction {
 
         } else {
             errors.addAll(getErrors(query));
-            webRequest.getResponse().setStatus(HTTP_STATUS_CODE.SC_BAD_REQUEST);
         }
 
         if (!errors.isEmpty()) {
