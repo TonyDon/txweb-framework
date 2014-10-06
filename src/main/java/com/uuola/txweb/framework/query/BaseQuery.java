@@ -2,14 +2,13 @@
  * @(#)BaseQuery.java 2013-6-23
  * 
  * Copy Right@ uuola
- */ 
+ */
 
 package com.uuola.txweb.framework.query;
 
 import java.io.Serializable;
 
 import com.uuola.txweb.framework.dto.ValidateDTO;
-
 
 /**
  * <pre>
@@ -22,21 +21,21 @@ public abstract class BaseQuery extends ValidateDTO implements Serializable {
 
     private static final long serialVersionUID = 6592438136405632705L;
 
-   // 当前页码
-    private Integer pageNo;
-    
+    // 当前页码
+    protected Integer pageNo;
+
     // 当前排号
-    protected Integer crow;
-    
+    protected Integer crow = 0;
+
     // 列表显示记录数
-    protected Integer listSize;
-    
+    protected Integer listSize = 20;
+
     // 查询总记录数
-    protected Integer records;
+    protected Integer records = 0;
 
     // 排序 asc or desc
     protected String sord;
-    
+
     // 排序所在字段名称
     protected String sidx;
 
@@ -46,15 +45,7 @@ public abstract class BaseQuery extends ValidateDTO implements Serializable {
     abstract public void filter();
 
     public BaseQuery() {
-        if (crow == null) {
-            crow = 0;
-        }
-        if (listSize == null || listSize > 100) {
-            listSize = 20;
-        }
-        if (records == null) {
-            records = 0;
-        }
+        
     }
 
     /**
@@ -65,7 +56,8 @@ public abstract class BaseQuery extends ValidateDTO implements Serializable {
     }
 
     /**
-     * @param crow the crow to set
+     * @param crow
+     *            the crow to set
      */
     public void setCrow(Integer crow) {
         this.crow = crow;
@@ -79,56 +71,45 @@ public abstract class BaseQuery extends ValidateDTO implements Serializable {
     }
 
     /**
-     * @param listsize the listsize to set
+     * @param listsize
+     *            the listsize to set
      */
     public void setListSize(Integer listSize) {
-        if (listSize == null || listSize > 100) {
-            this.listSize = 20;
-        } else {
-            this.listSize = listSize;
-        }
+        this.listSize = listSize;
     }
 
-    
     public String getSord() {
         return sord;
     }
 
-    
     public void setSord(String sord) {
         this.sord = sord;
     }
 
-    
     public String getSidx() {
         return sidx;
     }
 
-    
     public void setSidx(String sidx) {
         this.sidx = sidx;
     }
 
-    
     public Integer getRecords() {
         return records;
     }
 
-    
     public void setRecords(Integer records) {
         this.records = records;
     }
 
-    
     public Integer getPageNo() {
         return pageNo;
     }
 
-    
     public void setPageNo(Integer pageNo) {
         this.pageNo = pageNo;
     }
-    
+
     /**
      * 计算当前记录行号
      */
