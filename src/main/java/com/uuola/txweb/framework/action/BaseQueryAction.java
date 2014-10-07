@@ -57,8 +57,10 @@ public abstract class BaseQueryAction extends BaseAction {
                 model.addObject(QUERY_PAGE_ATTR, pageDTO);
             } catch (BusinessException be) {
                 errors.add(BusinessExceptionMessageProvider.getMessage(be));
+                log.error("BaseQueryAction.executeQuery()", be);
             } catch (Exception e) {
                 errors.add(ExceptionUtils.getFullStackTrace(e));
+                log.error("BaseQueryAction.executeQuery()", e);
             }
 
         } else {
