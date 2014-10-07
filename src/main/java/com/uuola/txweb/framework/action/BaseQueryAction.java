@@ -16,9 +16,9 @@ import org.springframework.web.servlet.ModelAndView;
 import com.uuola.commons.constant.HTTP_STATUS_CODE;
 import com.uuola.commons.exception.BusinessException;
 import com.uuola.commons.exception.BusinessExceptionMessageProvider;
+import com.uuola.txweb.framework.action.methods.QueryCallbackHandler;
 import com.uuola.txweb.framework.dto.PageDTO;
 import com.uuola.txweb.framework.query.BaseQuery;
-import com.uuola.txweb.framework.query.QueryCallbackHandler;
 
 /**
  * <pre>
@@ -57,10 +57,10 @@ public abstract class BaseQueryAction extends BaseAction {
                 model.addObject(QUERY_PAGE_ATTR, pageDTO);
             } catch (BusinessException be) {
                 errors.add(BusinessExceptionMessageProvider.getMessage(be));
-                log.error("BaseQueryAction.executeQuery()", be);
+                log.error("", be);
             } catch (Exception e) {
                 errors.add(ExceptionUtils.getFullStackTrace(e));
-                log.error("BaseQueryAction.executeQuery()", e);
+                log.error("", e);
             }
 
         } else {

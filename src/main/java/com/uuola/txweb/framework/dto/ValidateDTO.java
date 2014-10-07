@@ -22,7 +22,15 @@ public abstract class ValidateDTO implements Serializable {
 
     private transient Set<ConstraintViolation<ValidateDTO>> validSet;
 
+    /**
+     * 默认验证通过
+     */
     private boolean validPass = true;
+    
+    /**
+     * 默认需要验证
+     */
+    private boolean isNeedValid = true; 
 
     /**
      * 验证dto所有字段方法，通过返回true 否则返回false
@@ -59,5 +67,17 @@ public abstract class ValidateDTO implements Serializable {
 
     public boolean isValidPass() {
         return validPass;
+    }
+
+    
+    public boolean isNeedValid() {
+        return isNeedValid;
+    }
+    
+    /**
+     * 关闭DTO验证
+     */
+    public void closeValid(){
+        this.isNeedValid = false;
     }
 }

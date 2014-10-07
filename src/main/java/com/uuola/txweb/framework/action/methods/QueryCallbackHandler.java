@@ -4,9 +4,10 @@
  * Copy Right@ uuola
  */ 
 
-package com.uuola.txweb.framework.query;
+package com.uuola.txweb.framework.action.methods;
 
 import com.uuola.txweb.framework.dto.PageDTO;
+import com.uuola.txweb.framework.query.BaseQuery;
 
 
 /**
