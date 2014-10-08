@@ -79,13 +79,13 @@ public abstract class ValidateDTO implements Serializable {
      * 关闭DTO验证
      */
     public void closeValid(){
-        this.isNeedValid = false;
+        isNeedValid = false;
     }
     
     /**
      * 开启DTO验证
      */
     public void openValid(){
-        this.isNeedValid = true;
+        isNeedValid = true;
     }
 }
