@@ -186,9 +186,7 @@ public abstract class BaseAction {
         } else {
             try {
                 T result = handler.doUpdate(clientDTO);
-                if (null != result) {
-                    model.getModel().put(UPDATE_RESULT_ATTR, result);
-                }
+                model.addObject(UPDATE_RESULT_ATTR, result);
             } catch (BusinessException be) {
                 errors.add(BusinessExceptionMessageProvider.getMessage(be));
                 log.error("", be);

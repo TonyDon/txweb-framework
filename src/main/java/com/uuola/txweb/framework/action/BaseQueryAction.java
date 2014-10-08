@@ -46,7 +46,9 @@ public abstract class BaseQueryAction extends BaseAction {
     protected ModelAndView executeQuery(ServletWebRequest webRequest, BaseQuery query, QueryCallbackHandler handler) {
         ModelAndView model = new ModelAndView();
         List<String> errors = new ArrayList<String>();
-        if (query.validatePass()) {
+        if (query.isNeedValid() && !query.validatePass()) {
+            errors.addAll(getErrors(query));
+        } else {
             try {
                 // 执行查询条件过滤方法，如非法值过滤，默认条件设置, 值转换等
                 query.filter();
@@ -62,16 +64,11 @@ public abstract class BaseQueryAction extends BaseAction {
                 errors.add(ExceptionUtils.getFullStackTrace(e));
                 log.error("", e);
             }
-
-        } else {
-            errors.addAll(getErrors(query));
         }
-
         if (!errors.isEmpty()) {
             model.addObject(ERRORS_ATTR, errors);
             webRequest.getResponse().setStatus(HTTP_STATUS_CODE.SC_BZ_ERROR);
         }
-
         return model;
     }
 
