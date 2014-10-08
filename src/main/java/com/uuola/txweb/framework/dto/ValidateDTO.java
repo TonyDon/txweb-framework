@@ -11,7 +11,8 @@ import org.apache.commons.collections.CollectionUtils;
 import com.uuola.txweb.framework.utils.ValidateUtil;
 
 /**
- * bean 验证方法封装
+ * bean dto validate验证方法封装<br/>
+ * 默认开启DTO字段验证<br/>
  * 对BEAN标注字段全部验证， 调用validatePass()
  * 对BEAN标注某一个字段进行验证， 调用validatePass(String propertyName)
  * @author tangxiaodong
@@ -79,5 +80,12 @@ public abstract class ValidateDTO implements Serializable {
      */
     public void closeValid(){
         this.isNeedValid = false;
+    }
+    
+    /**
+     * 开启DTO验证
+     */
+    public void openValid(){
+        this.isNeedValid = true;
     }
 }
