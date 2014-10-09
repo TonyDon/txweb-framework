@@ -32,9 +32,9 @@ import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.util.ReflectionUtils;
 
+import com.uuola.commons.exception.Assert;
 import com.uuola.commons.reflect.ClassUtil;
 import com.uuola.txweb.framework.dao.utils.SqlBuilder;
-import com.uuola.txweb.framework.utils.TxAssert;
 
 
 /**
@@ -157,10 +157,10 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
     
     public int delete(T entity){
         Field idField = ReflectionUtils.findField(entity.getClass(), "id");
-        TxAssert.notNull(idField, "The id Field, Not found in [" + entity.getClass().getCanonicalName() + "]");
+        Assert.notNull(idField, "The id Field, Not found in [" + entity.getClass().getCanonicalName() + "]");
         ReflectionUtils.makeAccessible(idField);
         Serializable id  = (Serializable)ReflectionUtils.getField(idField, entity);
-        TxAssert.notNull(id, "Entity id Value Is Null,  in [" + entity.getClass().getCanonicalName() + "]");
+        Assert.notNull(id, "Entity id Value Is Null,  in [" + entity.getClass().getCanonicalName() + "]");
         return deleteById(id);
     }
     
@@ -173,7 +173,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
         Number id = this.saveReturnKey(sqlBuilder.getInsertSql(), sqlBuilder.getSqlParams());
         if (null != id) {
             Field idField = ReflectionUtils.findField(entity.getClass(), "id");
-            TxAssert.notNull(idField, "The id Field, Not found in [" + entity.getClass().getCanonicalName() + "]");
+            Assert.notNull(idField, "The id Field, Not found in [" + entity.getClass().getCanonicalName() + "]");
             ReflectionUtils.makeAccessible(idField);
             Object idValue = getIdValueByNumber(id, idField.getType());
             ReflectionUtils.setField(idField, entity, idValue);

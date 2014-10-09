@@ -16,9 +16,9 @@ import javax.persistence.Id;
 
 import com.uuola.commons.StringUtil;
 import com.uuola.commons.constant.CST_CHAR;
+import com.uuola.commons.exception.Assert;
 import com.uuola.commons.reflect.ClassUtil;
 import com.uuola.txweb.framework.dao.support.BaseEntity;
-import com.uuola.txweb.framework.utils.TxAssert;
 
 
 /**
@@ -56,7 +56,7 @@ public class SqlBuilder{
      * 通过实体类构建SQL所需参数
      */
     public SqlBuilder build() {
-        TxAssert.notNull(this.entity, "Entity must not be null!");
+        Assert.notNull(this.entity, "Entity must not be null!");
         Class<?> clazz = getEntity().getClass();
         this.tableName = ClassUtil.getTableName(clazz);
         Collection<Field> fields = ClassUtil.getAllAccessibleFields(clazz, BaseEntity.class);
@@ -88,7 +88,7 @@ public class SqlBuilder{
      * @return
      */
     public String getInsertSql(){
-        TxAssert.notNull(this.sqlColumns, "sqlColumns must not be null!");
+        Assert.notNull(this.sqlColumns, "sqlColumns must not be null!");
         StringBuilder sql = new StringBuilder("INSERT INTO ");
         sql.append(this.getTableName()).append("(");
         sql.append(StringUtil.join(this.sqlColumns,CST_CHAR.CHAR_COMMA));
@@ -101,8 +101,8 @@ public class SqlBuilder{
      * @return
      */
     public String getUpdateSql(){
-        TxAssert.notNull(this.uniqueKeyName, "uniqueKeyName must not be null!");
-        TxAssert.notNull(this.uniqueKeyValue, "uniqueKeyValue must not be null!");
+        Assert.notNull(this.uniqueKeyName, "uniqueKeyName must not be null!");
+        Assert.notNull(this.uniqueKeyValue, "uniqueKeyValue must not be null!");
         StringBuilder sql = new StringBuilder("UPDATE ");
         sql.append(this.getTableName()).append(" SET ");
         for(String col : sqlColumns){

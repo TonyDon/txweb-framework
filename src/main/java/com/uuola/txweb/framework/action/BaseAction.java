@@ -24,6 +24,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.uuola.commons.StringUtil;
 import com.uuola.commons.constant.CST_CHAR;
 import com.uuola.commons.constant.HTTP_STATUS_CODE;
+import com.uuola.commons.exception.Assert;
 import com.uuola.commons.exception.BusinessException;
 import com.uuola.commons.exception.BusinessExceptionMessageProvider;
 import com.uuola.txweb.framework.action.methods.QueryCallbackHandler;
@@ -31,7 +32,6 @@ import com.uuola.txweb.framework.action.methods.UpdateCallbackHandler;
 import com.uuola.txweb.framework.dto.PageDTO;
 import com.uuola.txweb.framework.dto.ValidateDTO;
 import com.uuola.txweb.framework.query.BaseQuery;
-import com.uuola.txweb.framework.utils.TxAssert;
 import com.uuola.txweb.framework.utils.ValidateUtil;
 
 /**
@@ -120,7 +120,7 @@ public abstract class BaseAction {
      */
     private String getPackagePath() {
         String packageName = this.getClass().getPackage().getName();
-        TxAssert.hasLength(packageName);
+        Assert.hasLength(packageName);
         return StringUtil.replace(packageName, CST_CHAR.STR_DOT, CST_CHAR.STR_SLASH);
     }
 
