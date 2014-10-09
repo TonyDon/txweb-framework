@@ -60,14 +60,14 @@ public abstract class BaseAction {
      * 转为 ：
      * com/uuola/txcms/portal/user/${actionPrefixName}-${methodName/otherName}
      */
-    protected String viewPrefixName;
+    private String viewPrefixPath;
 
     public BaseAction() {
         String viewPath = StringUtil.replace(getPackagePath(), "/action", CST_CHAR.STR_EMPTY);
-        this.viewPrefixName = viewPath.concat(CST_CHAR.STR_SLASH).concat(getActionPrefixName())
+        this.viewPrefixPath = viewPath.concat(CST_CHAR.STR_SLASH).concat(getActionPrefixName())
                 .concat(CST_CHAR.STR_LINE);
         if (log.isInfoEnabled()) {
-            log.info("viewPrefixName:" + this.viewPrefixName);
+            log.info("viewPrefixPath:" + this.viewPrefixPath);
         }
     }
 
@@ -132,7 +132,7 @@ public abstract class BaseAction {
      * @return
      */
     protected String getViewName(String methodName) {
-        return viewPrefixName.concat(methodName);
+        return viewPrefixPath.concat(methodName);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
