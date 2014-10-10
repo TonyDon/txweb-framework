@@ -9,6 +9,7 @@ package com.uuola.txweb.framework.interceptor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -29,7 +30,14 @@ public class UserAccessActionInterceptor extends HandlerInterceptorAdapter {
      // TODO Auto-generated method stub
         if(handler instanceof HandlerMethod){
             //TODO
+            HandlerMethod method = (HandlerMethod)handler;
+            System.out.println(method.getBeanType().getCanonicalName());
+            System.out.println(method.getMethod().getName());
+            MethodParameter[] params = method.getMethodParameters();
+            System.out.println(params.length);
         }
+        System.out.println(handler.getClass().getCanonicalName());
+        
         response.setStatus(HTTP_STATUS_CODE.SC_FORBIDDEN);
         response.getWriter().print("deny access.");
         return false;
