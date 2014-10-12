@@ -17,6 +17,8 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.uuola.commons.constant.HTTP_STATUS_CODE;
+import com.uuola.commons.exception.BusinessException;
+import com.uuola.commons.exception.BusinessExceptionMessageProvider;
 
 
 /**
@@ -46,10 +48,20 @@ public class WebAppExceptionResolver implements HandlerExceptionResolver, Ordere
         response.setStatus(HTTP_STATUS_CODE.SC_BZ_ERROR);
         ModelAndView model = new ModelAndView();
         exceptionLogHandle(ex);
-        model.addObject("exception", ExceptionUtils.getRootCauseMessage(ex));
+        model.addObject("exception", exceptionMessageResolve(ex));
         model.setViewName("exception/index");
         return model;
     }
+
+
+    private String exceptionMessageResolve(Exception ex) {
+        if(ex instanceof BusinessException){
+            BusinessException bizEx = (BusinessException)ex;
+           return ex.getMessage() +" : "+ BusinessExceptionMessageProvider.getMessage(bizEx);
+        }
+        return ExceptionUtils.getRootCauseMessage(ex);
+    }
+
 
     private void exceptionLogHandle(Exception ex) {
         if(isUseLogger() && logger.isErrorEnabled()){

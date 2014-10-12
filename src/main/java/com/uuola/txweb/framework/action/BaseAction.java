@@ -10,7 +10,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ui.Model;
@@ -25,8 +24,6 @@ import com.uuola.commons.StringUtil;
 import com.uuola.commons.constant.CST_CHAR;
 import com.uuola.commons.constant.HTTP_STATUS_CODE;
 import com.uuola.commons.exception.Assert;
-import com.uuola.commons.exception.BusinessException;
-import com.uuola.commons.exception.BusinessExceptionMessageProvider;
 import com.uuola.txweb.framework.action.methods.QueryCallbackHandler;
 import com.uuola.txweb.framework.action.methods.UpdateCallbackHandler;
 import com.uuola.txweb.framework.dto.PageDTO;
@@ -183,27 +180,18 @@ public abstract class BaseAction {
      * @param handler
      * @return
      */
-    protected <T> ModelAndView executeUpdate(ServletWebRequest webRequest, ValidateDTO clientDTO, UpdateCallbackHandler<T> handler) {
+    protected <T> ModelAndView executeUpdate(ServletWebRequest webRequest, ValidateDTO clientDTO,
+            UpdateCallbackHandler<T> handler) {
         ModelAndView model = new ModelAndView();
         List<String> errors = new ArrayList<String>();
         // 需要验证客户端DTO，但没有通过则不进行后续业务处理
         if (clientDTO.isNeedValid() && !clientDTO.validatePass()) {
             errors.addAll(getErrors(clientDTO));
-        } else {
-            try {
-                T result = handler.doUpdate(clientDTO);
-                model.addObject(UPDATE_RESULT_ATTR, result);
-            } catch (BusinessException be) {
-                errors.add(BusinessExceptionMessageProvider.getMessage(be));
-                log.error("", be);
-            } catch (Exception e) {
-                errors.add(ExceptionUtils.getFullStackTrace(e));
-                log.error("", e);
-            }
-        }
-        if (!errors.isEmpty()) {
             model.addObject(ERRORS_ATTR, errors);
             webRequest.getResponse().setStatus(HTTP_STATUS_CODE.SC_BZ_ERROR);
+        } else {
+            T result = handler.doUpdate(clientDTO);
+            model.addObject(UPDATE_RESULT_ATTR, result);
         }
         return model;
     }
@@ -217,31 +205,22 @@ public abstract class BaseAction {
      * @param webRequest 当前Request
      * @return
      */
-    protected ModelAndView executeQuery(ServletWebRequest webRequest, BaseQuery query, QueryCallbackHandler handler) {
+    protected ModelAndView executeQuery(ServletWebRequest webRequest, BaseQuery query, 
+            QueryCallbackHandler handler) {
         ModelAndView model = new ModelAndView();
         List<String> errors = new ArrayList<String>();
         if (query.isNeedValid() && !query.validatePass()) {
             errors.addAll(getErrors(query));
-        } else {
-            try {
-                // 执行查询条件过滤方法，如非法值过滤，默认条件设置, 值转换等
-                query.filter();
-                // 执行分页查询记录行计算
-                query.calcCurrRowIndex();
-                // 查询返回PageDTO对象
-                PageDTO pageDTO = handler.doQuery(query);
-                model.addObject(QUERY_PAGE_ATTR, pageDTO);
-            } catch (BusinessException be) {
-                errors.add(BusinessExceptionMessageProvider.getMessage(be));
-                log.error("", be);
-            } catch (Exception e) {
-                errors.add(ExceptionUtils.getFullStackTrace(e));
-                log.error("", e);
-            }
-        }
-        if (!errors.isEmpty()) {
             model.addObject(ERRORS_ATTR, errors);
             webRequest.getResponse().setStatus(HTTP_STATUS_CODE.SC_BZ_ERROR);
+        } else {
+            // 执行查询条件过滤方法，如非法值过滤，默认条件设置, 值转换等
+            query.filter();
+            // 执行分页查询记录行计算
+            query.calcCurrRowIndex();
+            // 查询返回PageDTO对象
+            PageDTO pageDTO = handler.doQuery(query);
+            model.addObject(QUERY_PAGE_ATTR, pageDTO);
         }
         return model;
     }
