@@ -19,5 +19,11 @@ import com.uuola.txweb.framework.query.BaseQuery;
  */
 public interface QueryCallbackHandler {
 
+    /**
+     * 查询执行回调
+     * @param query
+     * @param webRequest
+     * @return
+     */
     PageDTO doQuery(BaseQuery query);
 }

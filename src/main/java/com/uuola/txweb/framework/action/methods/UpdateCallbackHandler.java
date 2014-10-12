@@ -22,7 +22,9 @@ public interface UpdateCallbackHandler<T> {
     /**
      * 更新结果返回泛型对象
      * @param clientDTO
+     * @param webRequest
      * @return
      */
      T doUpdate(ValidateDTO clientDTO);
+     
 }

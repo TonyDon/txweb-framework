@@ -180,7 +180,7 @@ public abstract class BaseAction {
      * @param handler
      * @return
      */
-    protected <T> ModelAndView executeUpdate(ServletWebRequest webRequest, ValidateDTO clientDTO,
+    protected <T> ModelAndView updateAction(ServletWebRequest webRequest, ValidateDTO clientDTO,
             UpdateCallbackHandler<T> handler) {
         ModelAndView model = new ModelAndView();
         List<String> errors = new ArrayList<String>();
@@ -205,7 +205,7 @@ public abstract class BaseAction {
      * @param webRequest 当前Request
      * @return
      */
-    protected ModelAndView executeQuery(ServletWebRequest webRequest, BaseQuery query, 
+    protected ModelAndView queryAction(ServletWebRequest webRequest, BaseQuery query, 
             QueryCallbackHandler handler) {
         ModelAndView model = new ModelAndView();
         List<String> errors = new ArrayList<String>();
