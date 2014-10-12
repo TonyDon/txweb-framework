@@ -10,6 +10,6 @@
 
 
 	<!--  拦截action异常并做后续处理  -->
-	<bean class="com.uuola.txweb.framework.resolver.WebAppExceptionResolver"/>
+	<bean class="com.uuola.txweb.framework.resolver.WebAppExceptionResolver" p:order="1" p:useLogger="true"/>
 
 </beans>

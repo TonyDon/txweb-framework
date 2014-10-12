@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
@@ -25,8 +27,17 @@ import com.uuola.commons.constant.HTTP_STATUS_CODE;
  * </pre>
  */
 public class WebAppExceptionResolver implements HandlerExceptionResolver, Ordered  {
+    
+    private Logger logger = LoggerFactory.getLogger(getClass());
+    
+    /**
+     * 是否将异常写入日志
+     */
+    private boolean useLogger = false;
 
-
+    /**
+     * 多个resolver配置时当前解析器的排序位置，默认最低位
+     */
     private int order = Ordered.LOWEST_PRECEDENCE;
     
     @Override
@@ -34,9 +45,16 @@ public class WebAppExceptionResolver implements HandlerExceptionResolver, Ordere
             Exception ex) {
         response.setStatus(HTTP_STATUS_CODE.SC_BZ_ERROR);
         ModelAndView model = new ModelAndView();
-        model.addObject("exception", ExceptionUtils.getFullStackTrace(ex));
+        exceptionLogHandle(ex);
+        model.addObject("exception", ExceptionUtils.getRootCauseMessage(ex));
         model.setViewName("exception/index");
         return model;
+    }
+
+    private void exceptionLogHandle(Exception ex) {
+        if(isUseLogger() && logger.isErrorEnabled()){
+            logger.error("", ex);
+        }
     }
 
     public void setOrder(int order) {
@@ -46,6 +64,16 @@ public class WebAppExceptionResolver implements HandlerExceptionResolver, Ordere
     @Override
     public int getOrder() {
         return order;
+    }
+
+    
+    public boolean isUseLogger() {
+        return useLogger;
+    }
+
+    
+    public void setUseLogger(boolean useLogger) {
+        this.useLogger = useLogger;
     }
 
 }
