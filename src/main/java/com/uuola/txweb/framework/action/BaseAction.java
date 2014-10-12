@@ -180,15 +180,13 @@ public abstract class BaseAction {
      * @param handler
      * @return
      */
-    protected <T> ModelAndView updateAction(ServletWebRequest webRequest, ValidateDTO clientDTO,
-            UpdateCallbackHandler<T> handler) {
+    protected <T> ModelAndView updateAction(ValidateDTO clientDTO, UpdateCallbackHandler<T> handler) {
         ModelAndView model = new ModelAndView();
         List<String> errors = new ArrayList<String>();
         // 需要验证客户端DTO，但没有通过则不进行后续业务处理
         if (clientDTO.isNeedValid() && !clientDTO.validatePass()) {
             errors.addAll(getErrors(clientDTO));
             model.addObject(ERRORS_ATTR, errors);
-            webRequest.getResponse().setStatus(HTTP_STATUS_CODE.SC_BZ_ERROR);
         } else {
             T result = handler.doUpdate(clientDTO);
             model.addObject(UPDATE_RESULT_ATTR, result);
@@ -205,14 +203,12 @@ public abstract class BaseAction {
      * @param webRequest 当前Request
      * @return
      */
-    protected ModelAndView queryAction(ServletWebRequest webRequest, BaseQuery query, 
-            QueryCallbackHandler handler) {
+    protected ModelAndView queryAction(BaseQuery query, QueryCallbackHandler handler) {
         ModelAndView model = new ModelAndView();
         List<String> errors = new ArrayList<String>();
         if (query.isNeedValid() && !query.validatePass()) {
             errors.addAll(getErrors(query));
             model.addObject(ERRORS_ATTR, errors);
-            webRequest.getResponse().setStatus(HTTP_STATUS_CODE.SC_BZ_ERROR);
         } else {
             // 执行查询条件过滤方法，如非法值过滤，默认条件设置, 值转换等
             query.filter();
