@@ -62,15 +62,14 @@ public class ValidateUtil {
     
     /**
      * 格式化验证器返回的消息文本<br/>
-     * 如果消息文本中含 %s,则将无效对象的toString()内容进行替换
+     * 如果消息文本中含{path},则将无效属性路径名进行替换
      * @param cv
      * @return
      */
     public static <T> String formatMessage(ConstraintViolation<T> cv) {
         String cvMessage = cv.getMessage();
-        Object invalidValue = cv.getInvalidValue();
-        if (cvMessage.contains("%s") && null != invalidValue) {
-            cvMessage = StringUtil.replace(cvMessage, "%s", invalidValue.toString());
+        if (cvMessage.contains("{path}")) {
+            cvMessage = StringUtil.replace(cvMessage, "{path}", cv.getPropertyPath().toString());
         }
         return cvMessage;
     }
