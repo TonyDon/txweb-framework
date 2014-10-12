@@ -11,5 +11,20 @@
 
 	<!--  拦截action异常并做后续处理  -->
 	<bean class="com.uuola.txweb.framework.resolver.WebAppExceptionResolver" p:order="1" p:useLogger="true"/>
-
+	
+	<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="order" value="1" />
+		<property name="defaultErrorView" value="exception/index" />
+		<property name="exceptionAttribute" value="exception" />
+		<property name="defaultStatusCode" value="510" />
+		<!-- 对不同的异常分别输出视图 -->
+		<property name="exceptionMappings">
+			<props>
+				<prop key="BusinessException">exception/biz</prop>
+				<prop key="IOException">exception/io</prop>
+				<prop key="SQLException">exception/sql</prop>
+			</props>
+		</property>
+	</bean>
+	
 </beans>
