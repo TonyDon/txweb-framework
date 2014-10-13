@@ -45,12 +45,13 @@ public abstract class BaseAction {
     /**
      * 存放 validate校验错误信息
      */
-    protected static final String ERRORS_ATTR = "errors";
+    public static final String ERRORS_ATTR = "errors";
 
-    protected static final String UPDATE_RESULT_ATTR = "updateResult";
+    // 更新结果属性
+    public static final String UPDATE_RESULT_ATTR = "result";
     
     // 页面使用PageDTO的属性名称 如: page.datas , page.total
-    protected static final String QUERY_PAGE_ATTR = "page";
+    public static final String QUERY_PAGE_ATTR = "page";
 
     /**
      * 根据包路径和Action类构建视图名路径，如： com.uuola.txcms.portal.user.action.UserInfoAction
