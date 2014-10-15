@@ -18,6 +18,7 @@ import org.springframework.util.ReflectionUtils;
 
 import com.uuola.commons.DateUtil;
 import com.uuola.commons.reflect.ClassUtil;
+import com.uuola.commons.reflect.FieldUtil;
 import com.uuola.txweb.framework.dao.support.BaseEntity;
 import com.uuola.txweb.framework.dao.utils.SqlBuilder;
 
@@ -31,7 +32,7 @@ import com.uuola.txweb.framework.dao.utils.SqlBuilder;
  */
 public class ClassUtilTest {
 
-    //@Test
+    @Test
     public void test_class_getName(){
         System.out.println(DateUtil.class.getName());
         System.out.println(DateUtil.class.getCanonicalName());
@@ -39,17 +40,17 @@ public class ClassUtilTest {
         System.out.println(StringUtils.substringAfterLast(DateUtil.class.getName(), "."));
     }
     
-    //@Test
+    @Test
     public void test_table_column(){
         BaseEntity de = new DemoEntity();
         ((DemoEntity)de).setCitycode("00000123");
-        Collection<Field> fset = ClassUtil.getAllAccessibleFields(de.getClass(), BaseEntity.class);
+        Collection<Field> fset = FieldUtil.getAllAccessibleFieldList(de.getClass(), BaseEntity.class);
         for (Field f : fset)
             System.out.println(f.getAnnotation(Column.class) == null ? f.getName() : f.getAnnotation(Column.class)
                     .name());
-        Field cityCode = ClassUtil.findField(fset, "citycode", null);
+        Field cityCode = FieldUtil.findField(fset, "citycode", null);
         if (cityCode != null)
-            System.out.println(ClassUtil.getFieldValue(cityCode, de));
+            System.out.println(FieldUtil.getValue(cityCode, de));
     }
     
     @Test

@@ -18,6 +18,7 @@ import com.uuola.commons.StringUtil;
 import com.uuola.commons.constant.CST_CHAR;
 import com.uuola.commons.exception.Assert;
 import com.uuola.commons.reflect.ClassUtil;
+import com.uuola.commons.reflect.FieldUtil;
 import com.uuola.txweb.framework.dao.support.BaseEntity;
 
 
@@ -59,11 +60,11 @@ public class SqlBuilder{
         Assert.notNull(this.entity, "Entity must not be null!");
         Class<?> clazz = getEntity().getClass();
         this.tableName = ClassUtil.getTableName(clazz);
-        Collection<Field> fields = ClassUtil.getAllAccessibleFields(clazz, BaseEntity.class);
+        Collection<Field> fields = FieldUtil.getAllAccessibleFieldList(clazz, BaseEntity.class);
         sqlColumns = new ArrayList<String>();
         sqlParams = new ArrayList<Object>();
         for (Field f : fields) {
-            Object val = ClassUtil.getFieldValue(f, getEntity());
+            Object val = FieldUtil.getValue(f, getEntity());
             Column col = f.getAnnotation(Column.class);
             if (null != val && null != col) {
                 String columnName = col.name();
