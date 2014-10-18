@@ -12,17 +12,11 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.uuola.commons.StringUtil;
 import com.uuola.commons.constant.CST_CHAR;
-import com.uuola.commons.constant.HTTP_STATUS_CODE;
 import com.uuola.commons.exception.Assert;
 import com.uuola.txweb.framework.action.methods.QueryCallbackHandler;
 import com.uuola.txweb.framework.action.methods.UpdateCallbackHandler;
@@ -145,25 +139,6 @@ public abstract class BaseAction {
         return mv;
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-    protected void delete(@PathVariable("id") Serializable id, ServletWebRequest webRequest, Model model) {
-        Integer num = delete(id, webRequest);
-        if (num == null) {
-            webRequest.getResponse().setStatus(HTTP_STATUS_CODE.SC_NOT_FOUND);
-        }
-        model.addAttribute("num", num);
-    }
-
-    /**
-     * 返回影响记录数<br/>
-     * HTTP POST /path/123 ; _method="delete"
-     * 
-     * @param id
-     * @return
-     */
-    protected Integer delete(Serializable id, ServletWebRequest webRequest) {
-        return null;
-    }
 
     /**
      * 更新操作模版方法封装
