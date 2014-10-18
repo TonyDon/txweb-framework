@@ -20,7 +20,6 @@ import com.uuola.commons.constant.CST_CHAR;
 import com.uuola.commons.exception.Assert;
 import com.uuola.txweb.framework.action.methods.QueryCallbackHandler;
 import com.uuola.txweb.framework.action.methods.UpdateCallbackHandler;
-import com.uuola.txweb.framework.dto.PageDTO;
 import com.uuola.txweb.framework.dto.ValidateDTO;
 import com.uuola.txweb.framework.query.BaseQuery;
 import com.uuola.txweb.framework.utils.ValidateUtil;
@@ -171,7 +170,7 @@ public abstract class BaseAction {
      * @param webRequest 当前Request
      * @return
      */
-    protected ModelAndView queryAction(BaseQuery query, QueryCallbackHandler handler) {
+    protected <T> ModelAndView queryAction(BaseQuery query, QueryCallbackHandler<T> handler) {
         ModelAndView model = new ModelAndView();
         List<String> errors = new ArrayList<String>();
         if (query.isNeedValid() && !query.validatePass()) {
@@ -182,9 +181,9 @@ public abstract class BaseAction {
             query.filter();
             // 执行分页查询记录行计算
             query.calcCurrRowIndex();
-            // 查询返回PageDTO对象
-            PageDTO pageDTO = handler.doQuery(query);
-            model.addObject(IConstant.QUERY_PAGE_ATTR, pageDTO);
+            // 查询返回结果对象如PageDTO 
+            T result = handler.doQuery(query);
+            model.addObject(IConstant.QUERY_PAGE_ATTR, result);
         }
         return model;
     }
