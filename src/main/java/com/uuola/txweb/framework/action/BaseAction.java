@@ -43,17 +43,6 @@ public abstract class BaseAction {
     protected Logger log = LoggerFactory.getLogger(getClass());
 
     /**
-     * 存放 validate校验错误信息
-     */
-    public static final String ERRORS_ATTR = "errors";
-
-    // 更新结果属性
-    public static final String UPDATE_RESULT_ATTR = "result";
-    
-    // 页面使用PageDTO的属性名称 如: page.datas , page.total
-    public static final String QUERY_PAGE_ATTR = "page";
-
-    /**
      * 根据包路径和Action类构建视图名路径，如： com.uuola.txcms.portal.user.action.UserInfoAction
      * 转为 ：
      * com/uuola/txcms/portal/user/${actionPrefixName}-${methodName/otherName}
@@ -187,10 +176,10 @@ public abstract class BaseAction {
         // 需要验证客户端DTO，但没有通过则不进行后续业务处理
         if (clientDTO.isNeedValid() && !clientDTO.validatePass()) {
             errors.addAll(getErrors(clientDTO));
-            model.addObject(ERRORS_ATTR, errors);
+            model.addObject(IConstant.ERRORS_ATTR, errors);
         } else {
             T result = handler.doUpdate(clientDTO);
-            model.addObject(UPDATE_RESULT_ATTR, result);
+            model.addObject(IConstant.UPDATE_RESULT_ATTR, result);
         }
         return model;
     }
@@ -209,7 +198,7 @@ public abstract class BaseAction {
         List<String> errors = new ArrayList<String>();
         if (query.isNeedValid() && !query.validatePass()) {
             errors.addAll(getErrors(query));
-            model.addObject(ERRORS_ATTR, errors);
+            model.addObject(IConstant.ERRORS_ATTR, errors);
         } else {
             // 执行查询条件过滤方法，如非法值过滤，默认条件设置, 值转换等
             query.filter();
@@ -217,7 +206,7 @@ public abstract class BaseAction {
             query.calcCurrRowIndex();
             // 查询返回PageDTO对象
             PageDTO pageDTO = handler.doQuery(query);
-            model.addObject(QUERY_PAGE_ATTR, pageDTO);
+            model.addObject(IConstant.QUERY_PAGE_ATTR, pageDTO);
         }
         return model;
     }

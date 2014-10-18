@@ -16,9 +16,11 @@ import org.springframework.core.Ordered;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.uuola.commons.StringUtil;
 import com.uuola.commons.constant.HTTP_STATUS_CODE;
 import com.uuola.commons.exception.BusinessException;
 import com.uuola.commons.exception.BusinessExceptionMessageProvider;
+import com.uuola.txweb.framework.action.IConstant;
 
 
 /**
@@ -36,6 +38,11 @@ public class WebAppExceptionResolver implements HandlerExceptionResolver, Ordere
      * 是否将异常写入日志
      */
     private boolean useLogger = false;
+    
+    /**
+     * 设置异常页视图名称
+     */
+    private String exceptionViewName ;
 
     /**
      * 多个resolver配置时当前解析器的排序位置，默认最低位
@@ -48,8 +55,8 @@ public class WebAppExceptionResolver implements HandlerExceptionResolver, Ordere
         response.setStatus(HTTP_STATUS_CODE.SC_BZ_ERROR);
         ModelAndView model = new ModelAndView();
         exceptionLogHandle(ex);
-        model.addObject("exception", exceptionMessageResolve(ex));
-        model.setViewName("exception/index");
+        model.addObject(IConstant.EXCEPTION, exceptionMessageResolve(ex));
+        model.setViewName(getExceptionViewName());
         return model;
     }
 
@@ -86,6 +93,18 @@ public class WebAppExceptionResolver implements HandlerExceptionResolver, Ordere
     
     public void setUseLogger(boolean useLogger) {
         this.useLogger = useLogger;
+    }
+
+
+    
+    public String getExceptionViewName() {
+        return StringUtil.isEmpty(exceptionViewName) ? "exception/index" : exceptionViewName;
+    }
+
+
+    
+    public void setExceptionViewName(String exceptionViewName) {
+        this.exceptionViewName = exceptionViewName;
     }
 
 }
