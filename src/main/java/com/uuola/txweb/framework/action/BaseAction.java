@@ -43,9 +43,9 @@ public abstract class BaseAction {
     protected Logger log = LoggerFactory.getLogger(getClass());
 
     /**
-     * 根据包路径和Action类构建视图名路径，如： com.uuola.txcms.portal.user.action.UserInfoAction
-     * 转为 ：
-     * com/uuola/txcms/portal/user/${actionPrefixName}-${methodName/otherName}
+     * 根据包路径和Action类构建视图名路径，如： com.uuola.txcms.portal.user.action.UserInfoAction<br/>
+     * 转为 ：<br/>
+     * com/uuola/txcms/portal/user/${actionPrefixName}-${methodName/defineName}
      */
     private String viewPrefixPath;
 
@@ -86,7 +86,7 @@ public abstract class BaseAction {
     }
 
     /**
-     * 得到action名称前缀 eg : DemoHelloAction -> demoHello
+     * 得到action名称前缀 eg : DemoHelloAction -&gt; demoHello
      * 
      * @return
      */
@@ -108,6 +108,10 @@ public abstract class BaseAction {
     private String getPackagePath() {
         String packageName = this.getClass().getPackage().getName();
         Assert.hasLength(packageName);
+        if (StringUtil.endNotWith(packageName, "/action")) {
+            throw new RuntimeException(this.getClass().getCanonicalName()
+                    + "-[Must End With '.action', The Path Of Action Package!]");
+        }
         return StringUtil.replace(packageName, CST_CHAR.STR_DOT, CST_CHAR.STR_SLASH);
     }
 
