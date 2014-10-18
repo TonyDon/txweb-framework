@@ -16,7 +16,6 @@ import org.springframework.core.Ordered;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.uuola.commons.StringUtil;
 import com.uuola.commons.constant.HTTP_STATUS_CODE;
 import com.uuola.commons.exception.BusinessException;
 import com.uuola.commons.exception.BusinessExceptionMessageProvider;
@@ -42,7 +41,7 @@ public class WebAppExceptionResolver implements HandlerExceptionResolver, Ordere
     /**
      * 设置异常页视图名称
      */
-    private String exceptionViewName ;
+    private String exceptionViewName ="exception/index";
 
     /**
      * 多个resolver配置时当前解析器的排序位置，默认最低位
@@ -98,7 +97,7 @@ public class WebAppExceptionResolver implements HandlerExceptionResolver, Ordere
 
     
     public String getExceptionViewName() {
-        return StringUtil.isEmpty(exceptionViewName) ? "exception/index" : exceptionViewName;
+        return exceptionViewName;
     }
 
 
