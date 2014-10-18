@@ -108,7 +108,7 @@ public abstract class BaseAction {
     private String getPackagePath() {
         String packageName = this.getClass().getPackage().getName();
         Assert.hasLength(packageName);
-        if (StringUtil.endNotWith(packageName, "/action")) {
+        if (StringUtil.endNotWith(packageName, ".action")) {
             throw new RuntimeException(packageName + "-[Must End With '.action', The Path Of Action Package!]");
         }
         return StringUtil.replace(packageName, CST_CHAR.STR_DOT, CST_CHAR.STR_SLASH);
