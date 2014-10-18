@@ -7,6 +7,8 @@
 package com.uuola.txweb.framework.action;
 
 import java.io.Serializable;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +20,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.uuola.commons.StringUtil;
 import com.uuola.commons.constant.CST_CHAR;
 import com.uuola.commons.exception.Assert;
+import com.uuola.commons.exception.BusinessException;
 import com.uuola.txweb.framework.action.methods.QueryCallbackHandler;
 import com.uuola.txweb.framework.action.methods.UpdateCallbackHandler;
 import com.uuola.txweb.framework.dto.ValidateDTO;
@@ -148,17 +151,17 @@ public abstract class BaseAction {
      * @return
      */
     protected <T> ModelAndView updateAction(ValidateDTO clientDTO, UpdateCallbackHandler<T> handler) {
-        ModelAndView model = new ModelAndView();
+        ModelAndView mv = new ModelAndView();
         List<String> errors = new ArrayList<String>();
         // 需要验证客户端DTO，但没有通过则不进行后续业务处理
         if (clientDTO.isNeedValid() && !clientDTO.validatePass()) {
             errors.addAll(getErrors(clientDTO));
-            model.addObject(IConstant.VALID_ERRORS_ATTR, errors);
+            mv.addObject(IConstant.VALID_ERRORS_ATTR, errors);
         } else {
             T result = handler.doUpdate(clientDTO);
-            model.addObject(IConstant.UPDATE_RESULT_ATTR, result);
+            mv.addObject(IConstant.UPDATE_RESULT_ATTR, result);
         }
-        return model;
+        return mv;
     }
     
     
@@ -167,25 +170,60 @@ public abstract class BaseAction {
      * 
      * @param query 查询条件
      * @param handler 查询处理外部回调执行者
-     * @param webRequest 当前Request
-     * @return
+     * @return ModelAndView
      */
     protected <T> ModelAndView queryAction(BaseQuery query, QueryCallbackHandler<T> handler) {
-        ModelAndView model = new ModelAndView();
+        return queryAction(query,  null, handler);
+    }
+    
+    /**
+     * 封装查询过程
+     * 
+     * @param query 查询条件
+     * @param handler 查询处理外部回调执行者
+     * @param queryResultAttrName 给查询结果定一个属性名称到ModelAndView 若为空则使用结果对象的SimpleName作为属性名
+     * @return ModelAndView
+     */
+    protected <T> ModelAndView queryAction(BaseQuery query, String queryResultAttrName, QueryCallbackHandler<T> handler) {
+        ModelAndView mv = new ModelAndView();
         List<String> errors = new ArrayList<String>();
         if (query.isNeedValid() && !query.validatePass()) {
             errors.addAll(getErrors(query));
-            model.addObject(IConstant.VALID_ERRORS_ATTR, errors);
+            mv.addObject(IConstant.VALID_ERRORS_ATTR, errors);
         } else {
             // 执行查询条件过滤方法，如非法值过滤，默认条件设置, 值转换等
             query.filter();
             // 执行分页查询记录行计算
             query.calcCurrRowIndex();
-            // 查询返回结果对象如PageDTO 
+            // 查询返回结果对象如PageDTO
             T result = handler.doQuery(query);
-            model.addObject(IConstant.QUERY_PAGE_ATTR, result);
+            if(null == result){
+                result = newQueryCallbackHandlerResult(handler);
+                log.debug("Query Result Is Null! Try New Instance." );
+            }
+            if (StringUtil.isEmpty(queryResultAttrName)) {
+                mv.addObject(StringUtils.uncapitalize(result.getClass().getSimpleName()), result);
+            }else{
+                mv.addObject(queryResultAttrName, result);
+            }
         }
-        return model;
+        return mv;
     }
 
+    @SuppressWarnings("unchecked")
+    private <T> T newQueryCallbackHandlerResult(QueryCallbackHandler<T> handler) {
+        try {
+            Type[] types = handler.getClass().getGenericInterfaces();
+            for (Type type : types) {
+                ParameterizedType pType = (ParameterizedType) type;
+                if (pType.getRawType() == QueryCallbackHandler.class) {
+                    return ((Class<T>) pType.getActualTypeArguments()[0]).newInstance();
+                }
+            }
+            throw new RuntimeException("Don't Implement The QueryCallbackHandler<T> Interface !");
+
+        } catch (Exception e) {
+            throw new BusinessException(e, "QueryCallbackHandler<T> at Class<T>.newInstance() error!");
+        }
+    }
 }

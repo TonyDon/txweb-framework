@@ -24,9 +24,6 @@ public interface IConstant {
     // 更新结果属性
     public static final String UPDATE_RESULT_ATTR = "result";
     
-    // 页面使用PageDTO的属性名称 如: page.datas , page.total
-    public static final String QUERY_PAGE_ATTR = "page";
-    
     // 存放异常信息
     public static final String EXCEPTION ="exception";
     
