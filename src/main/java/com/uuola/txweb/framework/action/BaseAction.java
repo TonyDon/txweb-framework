@@ -146,7 +146,7 @@ public abstract class BaseAction {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-    protected void doDelete(@PathVariable("id") Serializable id, ServletWebRequest webRequest, Model model) {
+    protected void delete(@PathVariable("id") Serializable id, ServletWebRequest webRequest, Model model) {
         Integer num = delete(id, webRequest);
         if (num == null) {
             webRequest.getResponse().setStatus(HTTP_STATUS_CODE.SC_NOT_FOUND);
