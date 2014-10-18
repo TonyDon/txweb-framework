@@ -179,7 +179,7 @@ public abstract class BaseAction {
         // 需要验证客户端DTO，但没有通过则不进行后续业务处理
         if (clientDTO.isNeedValid() && !clientDTO.validatePass()) {
             errors.addAll(getErrors(clientDTO));
-            model.addObject(IConstant.ERRORS_ATTR, errors);
+            model.addObject(IConstant.VALID_ERRORS_ATTR, errors);
         } else {
             T result = handler.doUpdate(clientDTO);
             model.addObject(IConstant.UPDATE_RESULT_ATTR, result);
@@ -201,7 +201,7 @@ public abstract class BaseAction {
         List<String> errors = new ArrayList<String>();
         if (query.isNeedValid() && !query.validatePass()) {
             errors.addAll(getErrors(query));
-            model.addObject(IConstant.ERRORS_ATTR, errors);
+            model.addObject(IConstant.VALID_ERRORS_ATTR, errors);
         } else {
             // 执行查询条件过滤方法，如非法值过滤，默认条件设置, 值转换等
             query.filter();
