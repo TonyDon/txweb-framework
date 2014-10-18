@@ -4,7 +4,7 @@
  * Copy Right@ uuola
  */ 
 
-package com.uuola.txweb.framework.dao.utils;
+package com.uuola.txweb.framework.dao.support;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -19,7 +19,6 @@ import com.uuola.commons.constant.CST_CHAR;
 import com.uuola.commons.exception.Assert;
 import com.uuola.commons.reflect.ClassUtil;
 import com.uuola.commons.reflect.FieldUtil;
-import com.uuola.txweb.framework.dao.support.BaseEntity;
 
 
 /**

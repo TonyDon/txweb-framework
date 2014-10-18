@@ -20,7 +20,7 @@ import com.uuola.commons.DateUtil;
 import com.uuola.commons.reflect.ClassUtil;
 import com.uuola.commons.reflect.FieldUtil;
 import com.uuola.txweb.framework.dao.support.BaseEntity;
-import com.uuola.txweb.framework.dao.utils.SqlBuilder;
+import com.uuola.txweb.framework.dao.support.SqlBuilder;
 
 
 /**

@@ -34,7 +34,6 @@ import org.springframework.util.ReflectionUtils;
 
 import com.uuola.commons.exception.Assert;
 import com.uuola.commons.reflect.ClassUtil;
-import com.uuola.txweb.framework.dao.utils.SqlBuilder;
 
 
 /**

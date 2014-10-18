@@ -8,7 +8,7 @@ import org.springframework.jdbc.support.JdbcUtils;
 
 import com.uuola.commons.JsonUtil;
 import com.uuola.commons.constant.CST_REGEX;
-import com.uuola.txweb.framework.dao.utils.SqlBuilder;
+import com.uuola.txweb.framework.dao.support.SqlBuilder;
 
 
 public class StringTest {
