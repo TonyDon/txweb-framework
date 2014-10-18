@@ -116,38 +116,38 @@ public abstract class BaseAction {
 
     /**
      * 返回视图路径名称.<br/>
-     * packageDirPath + '/' + ActionPrefixName + '-' + methodName
+     * packageDirPath + '/' + ActionPrefixName + '-' + defineSuffixName
      * 
-     * @param methodName
+     * @param defineSuffixName
      * @return
      */
-    protected String getViewName(String methodName) {
-        return viewPrefixPath.concat(methodName);
+    protected String getViewName(String defineSuffixName) {
+        return viewPrefixPath.concat(defineSuffixName);
     }
-
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    protected String doShow(@PathVariable("id")
-    Serializable id, Model model) {
-        Object obj = show(id, model);
-        if (null != obj) {
-            String objAttrName = StringUtils.uncapitalize(obj.getClass().getSimpleName());
-            model.addAttribute(objAttrName, obj);
-        }
-        return getViewName("show");
-    }
-
+    
     /**
-     * 展示或获取记录<br/>
-     * HTTP GET, with id, url: /path/1234
+     * 定义包含视图名的ModelAndView
+     * @param defineName
+     * @return
      */
-    protected Object show(Serializable id, Model model) {
-        return null;
+    protected ModelAndView makeModelView(String defineSuffixName){
+        return new ModelAndView(getViewName(defineSuffixName));
+    }
+    
+    /**
+     * 设置视图名，并返回ModelAndView
+     * @param mv
+     * @param defineSuffixName
+     * @return ModelAndView
+     */
+    protected ModelAndView assignViewName(ModelAndView mv, String defineSuffixName){
+        mv.setViewName(getViewName(defineSuffixName));
+        return mv;
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-    protected void doDelete(@PathVariable("id")
-    Serializable id, ServletWebRequest webRequest, Model model) {
-        Integer num = delete(id);
+    protected void doDelete(@PathVariable("id") Serializable id, ServletWebRequest webRequest, Model model) {
+        Integer num = delete(id, webRequest);
         if (num == null) {
             webRequest.getResponse().setStatus(HTTP_STATUS_CODE.SC_NOT_FOUND);
         }
@@ -161,7 +161,7 @@ public abstract class BaseAction {
      * @param id
      * @return
      */
-    protected Integer delete(Serializable id) {
+    protected Integer delete(Serializable id, ServletWebRequest webRequest) {
         return null;
     }
 
