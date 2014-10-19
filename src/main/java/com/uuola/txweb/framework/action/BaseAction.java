@@ -152,9 +152,9 @@ public abstract class BaseAction {
      */
     protected <T> ModelAndView updateAction(ValidateDTO clientDTO, UpdateCallbackHandler<T> handler) {
         ModelAndView mv = new ModelAndView();
-        List<String> errors = new ArrayList<String>();
         // 需要验证客户端DTO，但没有通过则不进行后续业务处理
         if (clientDTO.isNeedValid() && !clientDTO.validatePass()) {
+            List<String> errors = new ArrayList<String>();
             errors.addAll(getErrors(clientDTO));
             mv.addObject(IConstant.VALID_ERRORS_ATTR, errors);
         } else {
@@ -186,8 +186,8 @@ public abstract class BaseAction {
      */
     protected <T> ModelAndView queryAction(BaseQuery query, String queryResultAttrName, QueryCallbackHandler<T> handler) {
         ModelAndView mv = new ModelAndView();
-        List<String> errors = new ArrayList<String>();
         if (query.isNeedValid() && !query.validatePass()) {
+            List<String> errors = new ArrayList<String>();
             errors.addAll(getErrors(query));
             mv.addObject(IConstant.VALID_ERRORS_ATTR, errors);
         } else {
