@@ -213,15 +213,23 @@ public abstract class BaseAction {
     @SuppressWarnings("unchecked")
     private <T> T newQueryCallbackHandlerResult(QueryCallbackHandler<T> handler) {
         try {
+            // 得到所有泛型接口类型
             Type[] types = handler.getClass().getGenericInterfaces();
-            for (Type type : types) {
-                ParameterizedType pType = (ParameterizedType) type;
-                if (pType.getRawType() == QueryCallbackHandler.class) {
-                    return ((Class<T>) pType.getActualTypeArguments()[0]).newInstance();
+            ParameterizedType pType = null;
+            if (types.length == 1) {
+                pType = (ParameterizedType) types[0];
+            } else {
+                for (Type type : types) {
+                    // 判断泛型类型的声明类是否匹配
+                    if (((ParameterizedType) type).getRawType() == QueryCallbackHandler.class) {
+                        pType = (ParameterizedType) type;
+                    }
                 }
             }
+            if (pType != null) {
+                return ((Class<T>) pType.getActualTypeArguments()[0]).newInstance();
+            }
             throw new RuntimeException("Don't Implement The QueryCallbackHandler<T> Interface !");
-
         } catch (Exception e) {
             throw new BusinessException(e, "QueryCallbackHandler<T> at Class<T>.newInstance() error!");
         }
