@@ -198,7 +198,7 @@ public abstract class BaseAction {
             // 查询返回结果对象如PageDTO
             T result = handler.doQuery(query);
             if(null == result){
-                result = newQueryCallbackHandlerResult(handler);
+                result = makeQueryResult(handler);
                 log.debug("Query Result Is Null! Try New Instance." );
             }
             if (StringUtil.isEmpty(queryResultAttrName)) {
@@ -210,8 +210,13 @@ public abstract class BaseAction {
         return mv;
     }
 
+    /**
+     * 根据接口泛型类型实例化对象
+     * @param handler
+     * @return
+     */
     @SuppressWarnings("unchecked")
-    private <T> T newQueryCallbackHandlerResult(QueryCallbackHandler<T> handler) {
+    private <T> T makeQueryResult(QueryCallbackHandler<T> handler) {
         try {
             // 得到所有泛型接口类型
             Type[] types = handler.getClass().getGenericInterfaces();
