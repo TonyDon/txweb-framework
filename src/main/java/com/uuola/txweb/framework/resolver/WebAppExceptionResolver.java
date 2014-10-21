@@ -63,7 +63,7 @@ public class WebAppExceptionResolver implements HandlerExceptionResolver, Ordere
     private String exceptionMessageResolve(Exception ex) {
         if(ex instanceof BusinessException){
             BusinessException bizEx = (BusinessException)ex;
-           return ex.getMessage() +" : "+ BusinessExceptionMessageProvider.getMessage(bizEx);
+           return BusinessExceptionMessageProvider.getMessage(bizEx);
         }
         return ExceptionUtils.getRootCauseMessage(ex);
     }
