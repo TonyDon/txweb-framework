@@ -82,7 +82,12 @@ public class SqlBuilder{
                 sqlParams.add(val);
             }
             if ((null == uniqueKeyName) && (null != f.getAnnotation(Id.class))) {
-                uniqueKeyName = col == null ? f.getName() : col.name();
+                String keyName = f.getName();
+                if(!keyName.equalsIgnoreCase("id")){
+                    // eg: userId -> user_id
+                    keyName = StringUtil.getUnderscoreName(f.getName());
+                }
+                uniqueKeyName = col == null ? keyName : col.name();
                 uniqueKeyValue = val;
             }
         }
