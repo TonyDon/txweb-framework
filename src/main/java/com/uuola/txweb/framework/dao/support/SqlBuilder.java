@@ -40,8 +40,14 @@ public class SqlBuilder{
     
     private BaseEntity entity;
     
+    /**
+     * 唯一字段名
+     */
     private String uniqueKeyName;
     
+    /**
+     * 唯一字段值
+     */
     private Object uniqueKeyValue;
     
     public SqlBuilder(){
@@ -105,12 +111,27 @@ public class SqlBuilder{
         Assert.notNull(this.uniqueKeyValue, "uniqueKeyValue must not be null!");
         StringBuilder sql = new StringBuilder("UPDATE ");
         sql.append(this.getTableName()).append(" SET ");
-        for(String col : sqlColumns){
-            sql.append(col).append("=?,");
+        int colCount = sqlColumns.size();
+        for (int k = 0; k < colCount; k++) {
+            sql.append(sqlColumns.get(k)).append("=?");
+            if (k + 1 < colCount) {
+                sql.append(",");
+            }
         }
-        sql.deleteCharAt(sql.length()-1);
         sql.append(" WHERE ").append(this.uniqueKeyName).append("=?");
         sqlParams.add(this.uniqueKeyValue);// append where condition to last
+        return sql.toString();
+    }
+    
+    /**
+     * 构建SQL删除预处理语句
+     * @return
+     */
+    public String getDeleteSql() {
+        Assert.notNull(this.uniqueKeyName, "uniqueKeyName must not be null!");
+        Assert.notNull(this.uniqueKeyValue, "uniqueKeyValue must not be null!");
+        StringBuilder sql = new StringBuilder("DELETE FROM ");
+        sql.append(this.getTableName()).append(" WHERE ").append(this.uniqueKeyName).append("=?");
         return sql.toString();
     }
 

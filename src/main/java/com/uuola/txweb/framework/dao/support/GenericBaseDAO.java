@@ -122,7 +122,27 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
         String sql = "delete from " +  this.getTableName() +" where id=? ";
         return this.getJdbcTemplate().update(sql, id);
     }
+    
+    /**
+     * 通过唯一key值删除实体记录
+     * @param entity
+     * @return
+     */
+    public int deleteByUniqueKey(T entity){
+        SqlBuilder sqlBuilder = new SqlBuilder(entity).build();
+        return this.update(sqlBuilder.getDeleteSql(), sqlBuilder.getUniqueKeyValue());
+    }
+    
 
+    /**
+     * 与 deleteByUniqueKey()相同
+     * @param entity
+     * @return
+     */
+    public int delete(T entity){
+        return deleteByUniqueKey(entity);
+    }
+    
     /**
      * JdbcTemplate 更新记录
      * @param sql
@@ -153,15 +173,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
         SqlBuilder sqlBuilder = new SqlBuilder(entity).build();
         return this.update(sqlBuilder.getUpdateSql(), sqlBuilder.getSqlParams());
     }
-    
-    public int delete(T entity){
-        Field idField = ReflectionUtils.findField(entity.getClass(), "id");
-        Assert.notNull(idField, "The id Field, Not found in [" + entity.getClass().getCanonicalName() + "]");
-        ReflectionUtils.makeAccessible(idField);
-        Serializable id  = (Serializable)ReflectionUtils.getField(idField, entity);
-        Assert.notNull(id, "Entity id Value Is Null,  in [" + entity.getClass().getCanonicalName() + "]");
-        return deleteById(id);
-    }
+
     
     /**
      * JdbcTemplate 保存实体记录到数据库, 并将自动递增
