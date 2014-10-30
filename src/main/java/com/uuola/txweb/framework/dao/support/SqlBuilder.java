@@ -98,11 +98,15 @@ public class SqlBuilder{
      * 构建SQL插入预处理语句
      * @return
      */
-    public String getInsertSql(){
+    public String getInsertSql() {
         Assert.notNull(this.sqlColumns, "sqlColumns must not be null!");
+        if (null != this.uniqueKeyName && null != this.uniqueKeyValue) {
+            sqlColumns.add(this.uniqueKeyName);
+            sqlParams.add(this.uniqueKeyValue);
+        }
         StringBuilder sql = new StringBuilder("INSERT INTO ");
         sql.append(this.getTableName()).append("(");
-        sql.append(StringUtil.join(this.sqlColumns,CST_CHAR.CHAR_COMMA));
+        sql.append(StringUtil.join(this.sqlColumns, CST_CHAR.CHAR_COMMA));
         sql.append(") VALUES (").append(SqlBuilder.getPlaceholder(this.sqlColumns.size())).append(")");
         return sql.toString();
     }

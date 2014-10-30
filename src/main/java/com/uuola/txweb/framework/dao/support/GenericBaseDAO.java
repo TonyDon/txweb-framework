@@ -130,7 +130,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      */
     public int deleteByUniqueKey(T entity){
         SqlBuilder sqlBuilder = new SqlBuilder(entity).build();
-        return this.update(sqlBuilder.getDeleteSql(), sqlBuilder.getUniqueKeyValue());
+        return delete(sqlBuilder);
     }
     
 
@@ -141,6 +141,15 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      */
     public int delete(T entity){
         return deleteByUniqueKey(entity);
+    }
+    
+    /**
+     * jdbcTemplate 通过SqlBuilder构建器 删除实体记录
+     * @param id
+     * @return
+     */
+    public int delete(SqlBuilder sqlBuilder){
+        return this.update(sqlBuilder.getDeleteSql(), sqlBuilder.getUniqueKeyValue());
     }
     
     /**
@@ -171,6 +180,15 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      */
     public int update(T entity){
         SqlBuilder sqlBuilder = new SqlBuilder(entity).build();
+        return update(sqlBuilder);
+    }
+    
+    /**
+     * JdbcTemplate 通过SqlBuilder构建器更新记录到数据库
+     * @param entity
+     * @return 
+     */
+    public int update(SqlBuilder sqlBuilder){
         return this.update(sqlBuilder.getUpdateSql(), sqlBuilder.getSqlParams());
     }
 
