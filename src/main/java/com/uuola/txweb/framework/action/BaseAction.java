@@ -50,7 +50,7 @@ public abstract class BaseAction {
         this.viewPrefixPath = viewPath.concat(CST_CHAR.STR_SLASH).concat(getActionPrefixName())
                 .concat(CST_CHAR.STR_LINE);
         if (log.isInfoEnabled()) {
-            log.info("viewPrefixPath:" + this.viewPrefixPath);
+            log.info("viewPrefixPath:" + this.viewPrefixPath + "{SuffixName}.*");
         }
     }
 
