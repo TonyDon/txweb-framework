@@ -225,23 +225,25 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
     private Map<String, String> getPropertyColumnMap(Class<T> entityClass) {
         Map<String, Field> nameFieldMap = FieldUtil.getAllAccessibleFieldNameMap(entityClass, BaseEntity.class);
         Assert.notEmpty(nameFieldMap);
-        Map<String, String> propColumnMap = new HashMap<String,String>(CollectionUtil.preferedMapSize(nameFieldMap.size()));
+        Map<String, String> propColumnMap = new HashMap<String, String>(CollectionUtil.preferedMapSize(nameFieldMap
+                .size()));
         boolean isFoundIdColumn = false;
-        for(Map.Entry<String,Field> entry : nameFieldMap.entrySet()){
+        for (Map.Entry<String, Field> entry : nameFieldMap.entrySet()) {
             String propName = entry.getKey();
             Field field = nameFieldMap.get(propName);
             Assert.notNull(field);
             Column column = field.getAnnotation(Column.class);
             String columnName = null;
-            if(null != column && StringUtil.isNotEmpty(columnName = column.name())){
+            if (null != column && StringUtil.isNotEmpty(columnName = column.name())) {
                 propColumnMap.put(propName, columnName);
             }
-            if(!isFoundIdColumn){
+            if (!isFoundIdColumn) {
                 // 构建主键ID对应的表字段名称
-                Id id  = field.getAnnotation(Id.class);
-                if(null != id){
+                Id id = field.getAnnotation(Id.class);
+                if (null != id) {
                     isFoundIdColumn = true;
-                    propColumnMap.put(field.getName(), StringUtil.getUnderscoreName(field.getName()));
+                    String fieldName = field.getName();
+                    propColumnMap.put(fieldName, fieldName.equals("id") ? "id" : StringUtil.getUnderscoreName(fieldName));
                 }
             }
         }
