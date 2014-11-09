@@ -27,4 +27,7 @@ public interface IConstant {
     // 存放异常信息
     public static final String EXCEPTION ="exception";
     
+    // jsonp 回调参数名称
+    public static final String CALL_BACK_NAME = "callback";
+    
 }

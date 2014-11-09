@@ -115,18 +115,17 @@ public class SqlBuilder{
      * 构建SQL更新预处理语句
      * @return
      */
-    public String getUpdateSql(){
+    public String getUpdateSql() {
         Assert.notNull(this.uniqueKeyName, "uniqueKeyName must not be null!");
         Assert.notNull(this.uniqueKeyValue, "uniqueKeyValue must not be null!");
         StringBuilder sql = new StringBuilder("UPDATE ");
         sql.append(this.getTableName()).append(" SET ");
         int colCount = sqlColumns.size();
-        for (int k = 0; k < colCount; k++) {
-            sql.append(sqlColumns.get(k)).append("=?");
-            if (k + 1 < colCount) {
-                sql.append(",");
-            }
+        int lastColIndex = colCount - 1;
+        for (int k = 0; k < lastColIndex; k++) {
+            sql.append(sqlColumns.get(k)).append("=?").append(",");
         }
+        sql.append(sqlColumns.get(lastColIndex)).append("=?");
         sql.append(" WHERE ").append(this.uniqueKeyName).append("=?");
         sqlParams.add(this.uniqueKeyValue);// append where condition to last
         return sql.toString();
@@ -152,13 +151,16 @@ public class SqlBuilder{
      * @return
      */
     public static String getPlaceholder(int argNum) {
-        StringBuilder buffer = new StringBuilder();
-        for(int i=0; i<argNum; i++){
-            buffer
-            .append(CST_CHAR.CHAR_QUESTION)
-            .append(CST_CHAR.CHAR_COMMA);
+        if (1 == argNum) {
+            return CST_CHAR.STR_QUESTION;
         }
-        return buffer.deleteCharAt(buffer.length()-1).toString();
+        StringBuilder sb = new StringBuilder();
+        int lastNum = argNum - 1;
+        for (int k = 0; k < lastNum; k++) {
+            sb.append(CST_CHAR.CHAR_QUESTION);
+            sb.append(CST_CHAR.CHAR_COMMA);
+        }
+        return sb.append(CST_CHAR.CHAR_QUESTION).toString();
     }
     
     /**

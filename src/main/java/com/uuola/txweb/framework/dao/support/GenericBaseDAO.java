@@ -12,11 +12,15 @@ import java.lang.reflect.ParameterizedType;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.Column;
+import javax.persistence.Id;
 import javax.sql.DataSource;
 
 import org.mybatis.spring.support.SqlSessionDaoSupport;
@@ -30,10 +34,15 @@ import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
+import com.uuola.commons.CollectionUtil;
+import com.uuola.commons.StringUtil;
+import com.uuola.commons.constant.CST_CHAR;
 import com.uuola.commons.exception.Assert;
 import com.uuola.commons.reflect.ClassUtil;
+import com.uuola.commons.reflect.FieldUtil;
 
 
 /**
@@ -47,6 +56,15 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
 
     private JdbcTemplate jdbcTemplate;
     
+    private Class<T> entityClass;
+    
+    private String tableName;
+    
+    
+    public GenericBaseDAO(){
+        setEntityClass();
+        initTableName();
+    }
     
     public JdbcTemplate getJdbcTemplate() {
         return jdbcTemplate;
@@ -64,17 +82,25 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @return 查询的实体类
      */
     @SuppressWarnings("unchecked")
-    public Class<T> getEntityClass() {
+    private void setEntityClass() {
         ParameterizedType pt = (ParameterizedType) this.getClass().getGenericSuperclass();
-        return (Class<T>) pt.getActualTypeArguments()[0];
+        this.entityClass = (Class<T>) pt.getActualTypeArguments()[0];
     }
     
     /**
      * 通过实体获取表名
      * @return
      */
+    private void initTableName(){
+        this.tableName = ClassUtil.getTableName(this.entityClass);
+    }
+    
+    /**
+     * 得到实体对应表名称
+     * @return
+     */
     public String getTableName(){
-        return ClassUtil.getTableName(this.getEntityClass());
+        return this.tableName;
     }
     
     /**
@@ -104,22 +130,163 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @return
      */
     public T get(Serializable id) {
-        String sql = "select * from " + this.getTableName() + " where id=? ";
+        String sql = "select * from " + this.tableName + " where id=? ";
         List<T> list = this.getJdbcTemplate().query(sql, new Object[] { id },
                 new RowMapperResultSetExtractor<T>(BeanPropertyRowMapper
-                        .newInstance(this.getEntityClass()), 1));
+                        .newInstance(this.entityClass), 1));
         return extractSingleObject(list);
     }
     
-
+    /**
+     * 通过属性名，值条件查询实体记录
+     * @param propertyName
+     * @param conditionValue
+     * @return  
+     */
+    public List<T> findByPropValue(String propertyName, Object conditionValue){
+        SqlPropertyValue pv = new SqlPropertyValue(propertyName, conditionValue);
+        return findByProperty(null, pv);
+    }
     
+    /**
+     * jdbcTemplate 根据实体属性查询记录结果
+     * @param selectPropertys 选择需要查出的属性
+     * @param findCondits
+     * @return
+     */
+    public List<T> findByProperty(String[] selectPropertys, SqlPropertyValue... findCondits) {
+        Assert.notEmpty(findCondits);
+
+        int conditsCount = findCondits.length;
+        Map<String, String> propColumnMap = getPropertyColumnMap(this.entityClass);
+        String queryColumn = ObjectUtils.isEmpty(selectPropertys) ? " * " : getQueryColumn(selectPropertys, propColumnMap);
+
+        StringBuilder sql = new StringBuilder("select " + queryColumn + " from " + this.tableName + " where ");
+        Object[] valueArgs = null;
+        if (1 == conditsCount) {
+            SqlPropertyValue pv = findCondits[0];
+            sql.append(makeProperySqlFragment(propColumnMap, pv));
+            valueArgs = SqlBuilder.getArgsArray(pv.getValue());
+            
+        } else {
+            Object[] params = new Object[conditsCount];
+            for (int k = 0; k < conditsCount; k++) {
+                SqlPropertyValue pv = findCondits[k];
+
+                sql.append(makeProperySqlFragment(propColumnMap, pv));
+                params[k] = pv.getValue();
+
+                // AND , OR
+                if (null != pv.getRelationCondition()) {
+                    sql.append(pv.getRelationCondition().getTag());
+                }
+            }
+
+            valueArgs = SqlBuilder.getArgsArray(params);
+        }
+
+        return this.getJdbcTemplate().query(sql.toString(), valueArgs,
+                BeanPropertyRowMapper.newInstance(this.entityClass));
+    }
+
+    /**
+     * 通过属性值对象，构建SQL条件片段
+     * @param propColumnMap
+     * @param pv
+     */
+    private StringBuilder makeProperySqlFragment(Map<String, String> propColumnMap, SqlPropertyValue pv) {
+        String columnName = propColumnMap.get(pv.getPropertyName());
+        Assert.hasLength(columnName, entityClass.getCanonicalName() + "." + pv.getPropertyName()
+                + " @Column.name must not be null!");
+        StringBuilder sql = new StringBuilder();
+        sql.append("(");
+        sql.append(columnName);
+        sql.append(pv.getFilterCondition().getTag());
+        Object value = pv.getValue();
+        Assert.notNull(value);
+        int placeNum = getParamsPlaceholder(value);
+        boolean isMultipleParam = placeNum > 1;
+        if (isMultipleParam) {
+            sql.append("(");
+        }
+        sql.append(SqlBuilder.getPlaceholder(placeNum));
+        if (isMultipleParam) {
+            sql.append(")");
+        }
+        sql.append(")");
+        return sql;
+    }
+    
+    /**
+     * 得到实体属性名与列标注名关系
+     * @param entityClass2
+     * @return
+     */
+    private Map<String, String> getPropertyColumnMap(Class<T> entityClass) {
+        Map<String, Field> nameFieldMap = FieldUtil.getAllAccessibleFieldNameMap(entityClass, BaseEntity.class);
+        Assert.notEmpty(nameFieldMap);
+        Map<String, String> propColumnMap = new HashMap<String,String>(CollectionUtil.preferedMapSize(nameFieldMap.size()));
+        boolean isFoundIdColumn = false;
+        for(Map.Entry<String,Field> entry : nameFieldMap.entrySet()){
+            String propName = entry.getKey();
+            Field field = nameFieldMap.get(propName);
+            Assert.notNull(field);
+            Column column = field.getAnnotation(Column.class);
+            String columnName = null;
+            if(null != column && StringUtil.isNotEmpty(columnName = column.name())){
+                propColumnMap.put(propName, columnName);
+            }
+            if(!isFoundIdColumn){
+                // 构建主键ID对应的表字段名称
+                Id id  = field.getAnnotation(Id.class);
+                if(null != id){
+                    isFoundIdColumn = true;
+                    propColumnMap.put(field.getName(), StringUtil.getUnderscoreName(field.getName()));
+                }
+            }
+        }
+        return propColumnMap;
+    }
+
+    /**
+     * 根据object类型得到参数占位符个数
+     * @param value
+     * @return
+     */
+    private int getParamsPlaceholder(Object value) {
+        int placeNum = 1;
+        if (value instanceof Collection) {
+            placeNum = ((Collection<?>) value).size();
+        } else if (value.getClass().isArray()) {
+            placeNum = ((Object[]) value).length;
+        }
+        return placeNum;
+    }
+
+    /**
+     * 根据输入的属性名得到查询列名称信息
+     * @param selectPropertys
+     * @param propColumnMap
+     * @return
+     */
+    private String getQueryColumn(String[] selectPropertys, Map<String, String> propColumnMap) {
+        List<String> columns = new ArrayList<String>(selectPropertys.length);
+        for (String prop : selectPropertys) {
+            String columnName = propColumnMap.get(prop);
+            Assert.hasLength(columnName, entityClass.getCanonicalName() + "." + prop
+                    + " @Column.name must not be null!");
+            columns.add(columnName);
+        }
+        return StringUtil.join(columns, CST_CHAR.CHAR_COMMA);
+    }
+
     /**
      * jdbcTemplate方法删除实体记录
      * @param id
      * @return
      */
     public int deleteById(Serializable id){
-        String sql = "delete from " +  this.getTableName() +" where id=? ";
+        String sql = "delete from " +  this.tableName +" where id=? ";
         return this.getJdbcTemplate().update(sql, id);
     }
     

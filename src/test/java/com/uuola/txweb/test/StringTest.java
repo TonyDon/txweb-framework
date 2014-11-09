@@ -28,6 +28,7 @@ public class StringTest {
         };
         System.out.println(JsonUtil.toJSONString(SqlBuilder.getArgsArray("hello", ids, kList, 1985, new Date())));
         System.out.println(CST_REGEX.RE_DATETIME.matcher("2012-9-1 12:11").matches());
+        System.out.println(SqlBuilder.getPlaceholder(10));
     }
 
 }
