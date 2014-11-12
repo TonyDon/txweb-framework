@@ -15,12 +15,8 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.persistence.Column;
-import javax.persistence.Id;
 
 import org.mybatis.spring.support.SqlSessionDaoSupport;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -36,12 +32,10 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
-import com.uuola.commons.CollectionUtil;
 import com.uuola.commons.StringUtil;
 import com.uuola.commons.constant.CST_CHAR;
 import com.uuola.commons.exception.Assert;
 import com.uuola.commons.reflect.ClassUtil;
-import com.uuola.commons.reflect.FieldUtil;
 
 
 /**
@@ -63,6 +57,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
     public GenericBaseDAO(){
         setEntityClass();
         initTableName();
+        EntityDefManager.addEntityClass(entityClass);
     }
     
     public JdbcTemplate getJdbcTemplate() {
@@ -146,7 +141,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
         Assert.notEmpty(findCondits);
 
         int conditsCount = findCondits.length;
-        Map<String, String> propColumnMap = getPropertyColumnMap(this.entityClass);
+        Map<String, String> propColumnMap = EntityDefManager.getDefBean(this.entityClass).getPropColumnMap();
         String queryColumn = ObjectUtils.isEmpty(selectPropertys) ? " * " : getQueryColumn(selectPropertys, propColumnMap);
 
         StringBuilder sql = new StringBuilder("select " + queryColumn + " from " + this.tableName + " where ");
@@ -205,38 +200,6 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
         return sql;
     }
     
-    /**
-     * 得到实体属性名与列标注名关系
-     * @param entityClass2
-     * @return
-     */
-    private Map<String, String> getPropertyColumnMap(Class<T> entityClass) {
-        Map<String, Field> nameFieldMap = FieldUtil.getAllAccessibleFieldNameMap(entityClass, BaseEntity.class);
-        Assert.notEmpty(nameFieldMap);
-        Map<String, String> propColumnMap = new HashMap<String, String>(CollectionUtil.preferedMapSize(nameFieldMap
-                .size()));
-        boolean isFoundIdColumn = false;
-        for (Map.Entry<String, Field> entry : nameFieldMap.entrySet()) {
-            String propName = entry.getKey();
-            Field field = nameFieldMap.get(propName);
-            Assert.notNull(field);
-            Column column = field.getAnnotation(Column.class);
-            String columnName = null;
-            if (null != column && StringUtil.isNotEmpty(columnName = column.name())) {
-                propColumnMap.put(propName, columnName);
-            }
-            if (!isFoundIdColumn) {
-                // 构建主键ID对应的表字段名称
-                Id id = field.getAnnotation(Id.class);
-                if (null != id) {
-                    isFoundIdColumn = true;
-                    String fieldName = field.getName();
-                    propColumnMap.put(fieldName, fieldName.equals("id") ? "id" : StringUtil.getUnderscoreName(fieldName));
-                }
-            }
-        }
-        return propColumnMap;
-    }
 
     /**
      * 根据object类型得到参数占位符个数
