@@ -32,4 +32,6 @@ public interface DBQualifiers {
     String TS_BASE_TX = "txwebfw_tx";
     String TS_BASE_SF = "txwebfw_sf";
     String TS_BASE_DS = "txwebfw_ds";
+    String TS_JDBC_TEMPLATE = "txwebJdbcTemplate";
+    String TS_MYBATIS_SESSION_TEMPLATE = "txwebSqlSessionTemplate";
 }

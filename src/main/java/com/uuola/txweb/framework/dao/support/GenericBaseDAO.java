@@ -21,7 +21,6 @@ import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
-import javax.sql.DataSource;
 
 import org.mybatis.spring.support.SqlSessionDaoSupport;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -69,12 +68,9 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
     public JdbcTemplate getJdbcTemplate() {
         return jdbcTemplate;
     }
-
     
-    public void setJdbcTemplateDataSource(DataSource ds) {
-        this.jdbcTemplate = new JdbcTemplate(ds);
-        this.jdbcTemplate.setFetchSize(50);
-        this.jdbcTemplate.setMaxRows(1000);
+    public void setJdbcTemplate(JdbcTemplate jdbcTemplate){
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     /**
@@ -101,14 +97,6 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      */
     public String getTableName(){
         return this.tableName;
-    }
-    
-    /**
-     * 得到当前的数据源
-     * @return
-     */
-    public DataSource getDataSource(){
-        return this.getSqlSession().getConfiguration().getEnvironment().getDataSource();
     }
     
     /**
