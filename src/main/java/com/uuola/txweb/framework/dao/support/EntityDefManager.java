@@ -39,18 +39,18 @@ public class EntityDefManager {
 
     private static ConcurrentMap<Class<? extends BaseEntity>, EntityDefBean> entityPropContainer = new ConcurrentHashMap<Class<? extends BaseEntity>, EntityDefBean>();
 
-    public static void addEntityClass(Class<? extends BaseEntity> clazz){
+    public static EntityDefBean addEntityClass(Class<? extends BaseEntity> clazz) {
         EntityDefBean defBean = entityPropContainer.get(clazz);
-        if(null == defBean){
-            entityPropContainer.putIfAbsent(clazz, resolveEntityClass(clazz));
+        if (null == defBean) {
+            defBean = resolveEntityClass(clazz);
+            entityPropContainer.putIfAbsent(clazz, defBean);
+            log.info("add entity class def bean to manager : " + clazz.getCanonicalName());
         }
-        log.info("add entity class defBean to manager : " + clazz.getCanonicalName());
+        return defBean;
     }
     
-    public  static EntityDefBean getDefBean(Class<? extends BaseEntity> clazz){
-        EntityDefBean defBean = entityPropContainer.get(clazz);
-        Assert.notNull(defBean, "Get Entity Def Bean is Null.for " + clazz.getCanonicalName());
-        return defBean;
+    public static EntityDefBean getDef(Class<? extends BaseEntity> clazz){
+        return addEntityClass(clazz);
     }
 
     private static EntityDefBean resolveEntityClass(Class<? extends BaseEntity> clazz) {

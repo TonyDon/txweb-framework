@@ -57,7 +57,6 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
     public GenericBaseDAO(){
         setEntityClass();
         initTableName();
-        EntityDefManager.addEntityClass(entityClass);
     }
     
     public JdbcTemplate getJdbcTemplate() {
@@ -141,7 +140,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
         Assert.notEmpty(findCondits);
 
         int conditsCount = findCondits.length;
-        Map<String, String> propColumnMap = EntityDefManager.getDefBean(this.entityClass).getPropColumnMap();
+        Map<String, String> propColumnMap = EntityDefManager.getDef(this.entityClass).getPropColumnMap();
         String queryColumn = ObjectUtils.isEmpty(selectPropertys) ? " * " : getQueryColumn(selectPropertys, propColumnMap);
 
         StringBuilder sql = new StringBuilder("select " + queryColumn + " from " + this.tableName + " where ");
