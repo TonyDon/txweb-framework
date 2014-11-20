@@ -99,4 +99,11 @@ public class EntityDefManager {
         }
         return propColumnMap;
     }
+    
+    /**
+     * 清空实体属性容器
+     */
+    public static void clear(){
+        entityPropContainer.clear();
+    }
 }

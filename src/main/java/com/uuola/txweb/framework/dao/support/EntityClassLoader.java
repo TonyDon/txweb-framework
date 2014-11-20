@@ -44,6 +44,7 @@ public class EntityClassLoader {
     public void init(){
         Assert.notEmpty(entityPackagePaths);
         log.info("initialize entity class loader!");
+        EntityDefManager.clear();
         for(String pack : entityPackagePaths){
             if(StringUtil.isNotEmpty(pack)){
                 invokeEntityDefManagerAdd(ClassUtil.getClasses(pack, recursiveFind));
