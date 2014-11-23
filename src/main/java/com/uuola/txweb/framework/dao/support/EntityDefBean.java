@@ -12,7 +12,7 @@ import java.util.Map;
 
 /**
  * <pre>
- *
+ * 表实体定义对象
  * @author tangxiaodong
  * 创建日期: 2014-11-12
  * </pre>
@@ -38,6 +38,16 @@ public class EntityDefBean {
      * 实体属性名与属性类关系
      */
     private Map<String, Field> propFieldMap;
+    
+    /**
+     * 主键属性名
+     */
+    private String uniqueKeyPropName;
+    
+    /**
+     * 实体类名称
+     */
+    private String entityClassName;
 
     
     public Class<? extends BaseEntity> getEntityClass() {
@@ -77,5 +87,29 @@ public class EntityDefBean {
     
     public void setPropFieldMap(Map<String, Field> propFieldMap) {
         this.propFieldMap = propFieldMap;
+    }
+
+
+    
+    public String getUniqueKeyPropName() {
+        return uniqueKeyPropName;
+    }
+
+
+    
+    public void setUniqueKeyPropName(String uniqueKeyPropName) {
+        this.uniqueKeyPropName = uniqueKeyPropName;
+    }
+
+
+    
+    public String getEntityClassName() {
+        return entityClassName;
+    }
+
+
+    
+    public void setEntityClassName(String entityClassName) {
+        this.entityClassName = entityClassName;
     }
 }

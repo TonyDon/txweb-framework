@@ -44,7 +44,7 @@ public class EntityDefManager {
         if (null == defBean) {
             defBean = resolveEntityClass(clazz);
             entityPropContainer.putIfAbsent(clazz, defBean);
-            log.info("add entity class def bean to manager : " + clazz.getCanonicalName());
+            log.info("add entity class def bean to manager : " + defBean.getEntityClassName());
         }
         return defBean;
     }
@@ -57,6 +57,7 @@ public class EntityDefManager {
         EntityDefBean defBean = new EntityDefBean();
         defBean.setEntityClass(clazz);
         defBean.setTableName(ClassUtil.getTableName(clazz));
+        defBean.setEntityClassName(clazz.getCanonicalName());
         Map<String, Field> propFieldMap = FieldUtil.getAllAccessibleFieldNameMap(defBean.getEntityClass(),
                 BaseEntity.class);
         Assert.notEmpty(propFieldMap);
@@ -83,8 +84,12 @@ public class EntityDefManager {
             Assert.notNull(field);
             Column column = field.getAnnotation(Column.class);
             String columnName = null;
-            if (null != column && StringUtil.isNotEmpty(columnName = column.name())) {
-                propColumnMap.put(propName, columnName);
+            if (null != column) {
+                if (StringUtil.isEmpty(columnName = column.name())) {
+                    log.warn("Not Set @Column.name Value ! Entity:[" + defBean.getEntityClassName() + "]");
+                } else {
+                    propColumnMap.put(propName, columnName);
+                }
             }
             if (!isFoundIdColumn) {
                 // 构建主键ID对应的表字段名称
@@ -92,8 +97,8 @@ public class EntityDefManager {
                 if (null != id) {
                     isFoundIdColumn = true;
                     String fieldName = field.getName();
-                    propColumnMap.put(fieldName,
-                            fieldName.equals("id") ? "id" : StringUtil.getUnderscoreName(fieldName));
+                    propColumnMap.put(fieldName, fieldName.equals("id") ? "id" : StringUtil.getUnderscoreName(fieldName));
+                    defBean.setUniqueKeyPropName(fieldName);
                 }
             }
         }

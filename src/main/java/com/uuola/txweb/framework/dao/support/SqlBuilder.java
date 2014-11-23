@@ -10,14 +10,12 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
-
+import com.uuola.commons.ObjectUtil;
 import com.uuola.commons.StringUtil;
 import com.uuola.commons.constant.CST_CHAR;
 import com.uuola.commons.exception.Assert;
-import com.uuola.commons.reflect.ClassUtil;
 import com.uuola.commons.reflect.FieldUtil;
 
 
@@ -50,8 +48,18 @@ public class SqlBuilder{
      */
     private Object uniqueKeyValue;
     
+    private Class<? extends BaseEntity> entityClass;
+    
+    private String whereCondition;
+    
+    private Object[] whereArgs;
+    
     public SqlBuilder(){
         
+    }
+    
+    public SqlBuilder(Class<? extends BaseEntity> entityClass){
+        this.entityClass = entityClass;
     }
     
     public SqlBuilder(BaseEntity entity){
@@ -63,39 +71,38 @@ public class SqlBuilder{
      */
     public SqlBuilder build() {
         Assert.notNull(this.entity, "Entity must not be null!");
-        Class<?> clazz = getEntity().getClass();
-        this.tableName = ClassUtil.getTableName(clazz);
-        Collection<Field> fields = FieldUtil.getAllAccessibleFieldList(clazz, BaseEntity.class);
+        this.entityClass = (Class<? extends BaseEntity>)entity.getClass();
+        EntityDefBean entityDef = EntityDefManager.getDef(this.entityClass);
+        this.tableName = entityDef.getTableName();
+        Map<String, Field> propNameFieldMap = entityDef.getPropFieldMap();
+        Map<String, String> propNameColumnMap = entityDef.getPropColumnMap();
         sqlColumns = new ArrayList<String>();
         sqlParams = new ArrayList<Object>();
-        for (Field f : fields) {
-            Object val = FieldUtil.getValue(f, getEntity());
-            Column col = f.getAnnotation(Column.class);
-            if (null != val && null != col) {
-                String columnName = col.name();
-                // 匿名注解Column.name 字段名不能为空或空串
-                if (StringUtil.isEmpty(columnName)) {
-                    throw new IllegalArgumentException(clazz.getCanonicalName() + "." + f.getName()
-                            + "[Annotation Column.name() must not be null!]");
-                }
-                sqlColumns.add(columnName);
+        Field uniqueKeField = null;
+        Object uniquePropVal = null;
+        String uniquePropName = entityDef.getUniqueKeyPropName();
+        for (Map.Entry<String, Field> pf : propNameFieldMap.entrySet()) {
+            String propName = pf.getKey();
+            Field propField = pf.getValue();
+            Object val = FieldUtil.getValue(propField, entity);
+            String col = propNameColumnMap.get(propName);
+            if (propName.equals(uniquePropName)) {
+                uniqueKeField = propField;
+                uniquePropVal = val;
+            } else if (null != val && null != col) {
+                sqlColumns.add(col);
                 sqlParams.add(val);
             }
-            if ((null == uniqueKeyName) && (null != f.getAnnotation(Id.class))) {
-                String keyName = f.getName();
-                if(!keyName.equalsIgnoreCase("id")){
-                    // eg: userId -> user_id
-                    keyName = StringUtil.getUnderscoreName(f.getName());
-                }
-                uniqueKeyName = col == null ? keyName : col.name();
-                uniqueKeyValue = val;
-            }
+        }
+        if (null == uniqueKeyName && null != uniqueKeField && null != uniquePropVal) {
+            uniqueKeyName = propNameColumnMap.get(uniquePropName);
+            uniqueKeyValue = uniquePropVal;
         }
         return this;
     }
     
     /**
-     * 构建SQL插入预处理语句
+     * 构建SQL插入预处理语句，可以结合build方法使用，也可单独调用
      * @return
      */
     public String getInsertSql() {
@@ -107,12 +114,13 @@ public class SqlBuilder{
         StringBuilder sql = new StringBuilder("INSERT INTO ");
         sql.append(this.getTableName()).append("(");
         sql.append(StringUtil.join(this.sqlColumns, CST_CHAR.CHAR_COMMA));
-        sql.append(") VALUES (").append(SqlBuilder.getPlaceholder(this.sqlColumns.size())).append(")");
+        sql.append(") VALUES (").append(StringUtil.getPlaceholder(this.sqlColumns.size())).append(")");
         return sql.toString();
     }
     
     /**
-     * 构建SQL更新预处理语句
+     * 构建SQL更新预处理语句，结合build方法使用<br/>
+     * 如果不通过build方式，需要手动设置唯一列和值
      * @return
      */
     public String getUpdateSql() {
@@ -132,70 +140,144 @@ public class SqlBuilder{
     }
     
     /**
-     * 构建SQL删除预处理语句
+     * 构建SQL删除预处理语句，结合build方法使用<br/>
+     * 如果不通过build方式，需要手动设置实体属性值
      * @return
      */
     public String getDeleteSql() {
-        Assert.notNull(this.uniqueKeyName, "uniqueKeyName must not be null!");
-        Assert.notNull(this.uniqueKeyValue, "uniqueKeyValue must not be null!");
         StringBuilder sql = new StringBuilder("DELETE FROM ");
-        sql.append(this.getTableName()).append(" WHERE ").append(this.uniqueKeyName).append("=?");
-        return sql.toString();
+        sql.append(this.getTableName()).append(" WHERE ");
+        if (StringUtil.isNotEmpty(this.uniqueKeyName) && null != this.uniqueKeyValue) {
+            // 如果主键存在且有值，直接使用该字段进行删除
+            SqlPropertyValue pv = new SqlPropertyValue(this.uniqueKeyName, this.uniqueKeyValue);
+            this.where(pv);
+        } else {
+            Assert.notEmpty(this.sqlColumns);
+            // 如果不存在主键，但是其他值有值，尝试使用其他属性值进行条件删除
+            int count = this.sqlColumns.size();
+            SqlPropertyValue[] pvArray = new SqlPropertyValue[count];
+            int lastColIndex = count - 1;
+            for (int i = 0; i < lastColIndex; i++) {
+                // 默认条件为列名equal值
+                SqlPropertyValue pv = new SqlPropertyValue(this.sqlColumns.get(i), this.sqlParams.get(i));
+                // 存在下一个关联条件
+                pv.setRelationCondition(SqlConditionDef.AND);
+                pvArray[i] = pv;
+            }
+            // 最后一个条件
+            SqlPropertyValue endPv = new SqlPropertyValue(this.sqlColumns.get(lastColIndex),
+                    this.sqlParams.get(lastColIndex));
+            pvArray[lastColIndex] = endPv;
+            this.where(pvArray);
+        }
+        return sql.append(this.getWhereCondition()).toString();
     }
 
     /**
-     * 构建IN条件参数占位符如 3个参数为 ?,?,?
-     * eg: Long[] inIds = {111L,222L,333L}; length = 3
-     * return ?,?,?
-     * @param argNum
+     * 构建where 条件
+     * @param findCondits
      * @return
      */
-    public static String getPlaceholder(int argNum) {
-        if (1 == argNum) {
-            return CST_CHAR.STR_QUESTION;
+    public SqlBuilder where(SqlPropertyValue... findCondits) {
+        Object[] valueArgs = null;
+        int conditsCount = findCondits.length;
+        Class<? extends BaseEntity> clazz = null == entity ? this.entityClass : (Class<? extends BaseEntity>) entity
+                .getClass();
+        Map<String, String> propColumnMap = EntityDefManager.getDef(clazz).getPropColumnMap();
+        // where ...
+        StringBuilder sql = new StringBuilder();
+        if (1 == conditsCount) {
+            SqlPropertyValue pv = findCondits[0];
+            sql.append(SqlBuilder.makeProperySqlFragment(clazz, propColumnMap, pv));
+            valueArgs = ObjectUtil.getArgsArray(pv.getValue());
+
+        } else {
+            Object[] params = new Object[conditsCount];
+            for (int k = 0; k < conditsCount; k++) {
+                SqlPropertyValue pv = findCondits[k];
+
+                sql.append(SqlBuilder.makeProperySqlFragment(clazz, propColumnMap, pv));
+                params[k] = pv.getValue();
+
+                // AND , OR
+                if (null != pv.getRelationCondition()) {
+                    sql.append(pv.getRelationCondition().getTag());
+                }
+            }
+            valueArgs = ObjectUtil.getArgsArray(params);
         }
-        StringBuilder sb = new StringBuilder();
-        int lastNum = argNum - 1;
-        for (int k = 0; k < lastNum; k++) {
-            sb.append(CST_CHAR.CHAR_QUESTION);
-            sb.append(CST_CHAR.CHAR_COMMA);
-        }
-        return sb.append(CST_CHAR.CHAR_QUESTION).toString();
+        this.whereArgs = valueArgs;
+        this.whereCondition = sql.toString();
+        return this;
     }
     
     /**
-     * 将数组对象Object中的集合对象拆解成单个元素组合到新的对象数组中，新对象数组不应有集合对象。
-     * eg: args ={ "a", 123, array{1,2,3} , 1, "t" }
-     * return : array{"a", 123, 1, 2, 3, 1, "t"}
-     * Long[] inIds = {111L,222L,333L};
-     * DAO.update("update table set flag=? where id in (?,?,?)", SqlBuilder.getArgsList(1, inIds));
-     * @param args
+     * 通过属性值对象，构建SQL条件片段
+     * 
+     * @param propColumnMap
+     * @param pv
+     */
+    public static StringBuilder makeProperySqlFragment(Class<? extends BaseEntity> entityClass,
+            Map<String, String> propColumnMap, SqlPropertyValue pv) {
+        String columnName = propColumnMap.get(pv.getPropertyName());
+        Assert.hasLength(columnName, entityClass.getCanonicalName() + "." + pv.getPropertyName()
+                + " @Column.name must not be null!");
+        StringBuilder sql = new StringBuilder();
+        Object value = pv.getValue();
+        Assert.notNull(value);
+        int placeNum = SqlBuilder.getSqlPlaceholderCount(value);
+        boolean isMultipleParam = placeNum > 1;
+        sql.append("(");
+        sql.append(columnName);
+        sql.append(autoCheckConditionTag(isMultipleParam,pv));
+        if (isMultipleParam) {
+            sql.append("(");
+        }
+        sql.append(StringUtil.getPlaceholder(placeNum));
+        if (isMultipleParam) {
+            sql.append(")");
+        }
+        sql.append(")");
+        return sql;
+    }
+
+    /**
+     * 自动检测属性值，如果为集合或数组，过滤条件根据预期条件推断出对应的多参数过滤标识
+     * @param isMultipleParam
+     * @param pv
      * @return
      */
-    public static List<Object> getArgsList(Object... args) {
-        List<Object> results = new ArrayList<Object>(args.length);
-        for(Object o: args) {
-            if(o instanceof Collection) {
-                Collection<?> c = (Collection<?>)o;
-                for(Object item: c) {
-                    results.add(item);
-                }
-            } else if(o.getClass().isArray()) {
-                Object[] c = (Object[])o;
-                for(Object item: c) {
-                    results.add(item);
-                }
-            } else {
-                results.add(o);
+    private static String autoCheckConditionTag(boolean isMultipleParam, SqlPropertyValue pv) {
+        SqlConditionDef actualCondTag = pv.getFilterCondition();
+        if(isMultipleParam){
+            switch(pv.getFilterCondition()){
+                case EQUAL : 
+                    actualCondTag = SqlConditionDef.IN;
+                    break;
+                case NOT_EQUAL : 
+                    actualCondTag = SqlConditionDef.NOT_IN;
+                    break;
+                default:
+                    break;
             }
         }
-        return results;
-    }
-    
-    public static Object[] getArgsArray(Object... args){
-        return getArgsList(args).toArray();
+        return actualCondTag.getTag();
     }
 
+    /**
+     * 根据object类型得到参数占位符个数
+     * @param value
+     * @return
+     */
+    public static int getSqlPlaceholderCount(Object value) {
+        int placeNum = 1;
+        if (value instanceof Collection) {
+            placeNum = ((Collection<?>) value).size();
+        } else if (value.getClass().isArray()) {
+            placeNum = ((Object[]) value).length;
+        }
+        return placeNum;
+    }
     
     public String getTableName() {
         return tableName;
@@ -254,6 +336,36 @@ public class SqlBuilder{
     
     public void setSqlColumns(List<String> sqlColumns) {
         this.sqlColumns = sqlColumns;
+    }
+
+    
+    public String getWhereCondition() {
+        return whereCondition;
+    }
+
+    
+    public void setWhereCondition(String whereCondition) {
+        this.whereCondition = whereCondition;
+    }
+
+    
+    public Object[] getWhereArgs() {
+        return whereArgs;
+    }
+
+    
+    public void setWhereArgs(Object[] whereArgs) {
+        this.whereArgs = whereArgs;
+    }
+
+    
+    public Class<? extends BaseEntity> getEntityClass() {
+        return entityClass;
+    }
+
+    
+    public void setEntityClass(Class<? extends BaseEntity> entityClass) {
+        this.entityClass = entityClass;
     }
     
     

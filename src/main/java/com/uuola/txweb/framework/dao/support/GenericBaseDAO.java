@@ -32,10 +32,12 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
+import com.uuola.commons.ObjectUtil;
 import com.uuola.commons.StringUtil;
 import com.uuola.commons.constant.CST_CHAR;
 import com.uuola.commons.exception.Assert;
 import com.uuola.commons.reflect.ClassUtil;
+import com.uuola.commons.reflect.FieldUtil;
 
 
 /**
@@ -86,14 +88,6 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
     }
     
     /**
-     * 得到实体对应表名称
-     * @return
-     */
-    public String getTableName(){
-        return this.tableName;
-    }
-    
-    /**
      * 得到 jdbcTemplate 预处理创建者工厂
      * @param sql
      * @param params
@@ -112,11 +106,35 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @return
      */
     public T get(Serializable id) {
-        String sql = "select * from " + this.tableName + " where id=? ";
+        String sql = "select * from " + this.tableName + " where " + getIdColumn(this.entityClass) + "=? ";
         List<T> list = this.getJdbcTemplate().query(sql, new Object[] { id },
-                new RowMapperResultSetExtractor<T>(BeanPropertyRowMapper
-                        .newInstance(this.entityClass), 1));
+                new RowMapperResultSetExtractor<T>(BeanPropertyRowMapper.newInstance(this.entityClass), 1));
         return extractSingleObject(list);
+    }
+    
+    /**
+     * jdbcTemplate 工具通过多主键值查询实体记录
+     * @param keys
+     * @return
+     */
+    public List<T> getByKeys(List<Object> keys) {
+        int size = keys.size();
+        String sql = "select * from " + this.tableName + " where " + getIdColumn(this.entityClass) + " in ("
+                + StringUtil.getPlaceholder(size) + ") ";
+        return this.getJdbcTemplate().query(sql, ObjectUtil.getArgsArray(keys),
+                new RowMapperResultSetExtractor<T>(BeanPropertyRowMapper.newInstance(this.entityClass), size));
+    }
+    
+    /**
+     * 得到主键列名
+     * @param entityClass
+     * @return
+     */
+    public String getIdColumn(Class<? extends BaseEntity> entityClass){
+        EntityDefBean entityDef = EntityDefManager.getDef(this.entityClass);
+        String keyPropName = entityDef.getUniqueKeyPropName();
+        Assert.hasLength(keyPropName, "not found uniqueKeyPropName at entity : " + entityClass.getCanonicalName());
+        return entityDef.getPropColumnMap().get(keyPropName);
     }
     
     /**
@@ -138,81 +156,14 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      */
     public List<T> findByProperty(String[] selectPropertys, SqlPropertyValue... findCondits) {
         Assert.notEmpty(findCondits);
-
-        int conditsCount = findCondits.length;
         Map<String, String> propColumnMap = EntityDefManager.getDef(this.entityClass).getPropColumnMap();
-        String queryColumn = ObjectUtils.isEmpty(selectPropertys) ? " * " : getQueryColumn(selectPropertys, propColumnMap);
-
-        StringBuilder sql = new StringBuilder("select " + queryColumn + " from " + this.tableName + " where ");
-        Object[] valueArgs = null;
-        if (1 == conditsCount) {
-            SqlPropertyValue pv = findCondits[0];
-            sql.append(makeProperySqlFragment(propColumnMap, pv));
-            valueArgs = SqlBuilder.getArgsArray(pv.getValue());
-            
-        } else {
-            Object[] params = new Object[conditsCount];
-            for (int k = 0; k < conditsCount; k++) {
-                SqlPropertyValue pv = findCondits[k];
-
-                sql.append(makeProperySqlFragment(propColumnMap, pv));
-                params[k] = pv.getValue();
-
-                // AND , OR
-                if (null != pv.getRelationCondition()) {
-                    sql.append(pv.getRelationCondition().getTag());
-                }
-            }
-
-            valueArgs = SqlBuilder.getArgsArray(params);
-        }
-
-        return this.getJdbcTemplate().query(sql.toString(), valueArgs,
+        String queryColumn = ObjectUtils.isEmpty(selectPropertys) ? " * " : getQueryColumn(selectPropertys,
+                propColumnMap);
+        String sql = "select " + queryColumn + " from " + this.tableName + " where ";
+        SqlBuilder sqlBuilder = new SqlBuilder(this.entityClass).where(findCondits);
+        sql += sqlBuilder.getWhereCondition();
+        return this.getJdbcTemplate().query(sql, sqlBuilder.getWhereArgs(),
                 BeanPropertyRowMapper.newInstance(this.entityClass));
-    }
-
-    /**
-     * 通过属性值对象，构建SQL条件片段
-     * @param propColumnMap
-     * @param pv
-     */
-    private StringBuilder makeProperySqlFragment(Map<String, String> propColumnMap, SqlPropertyValue pv) {
-        String columnName = propColumnMap.get(pv.getPropertyName());
-        Assert.hasLength(columnName, entityClass.getCanonicalName() + "." + pv.getPropertyName()
-                + " @Column.name must not be null!");
-        StringBuilder sql = new StringBuilder();
-        sql.append("(");
-        sql.append(columnName);
-        sql.append(pv.getFilterCondition().getTag());
-        Object value = pv.getValue();
-        Assert.notNull(value);
-        int placeNum = getParamsPlaceholder(value);
-        boolean isMultipleParam = placeNum > 1;
-        if (isMultipleParam) {
-            sql.append("(");
-        }
-        sql.append(SqlBuilder.getPlaceholder(placeNum));
-        if (isMultipleParam) {
-            sql.append(")");
-        }
-        sql.append(")");
-        return sql;
-    }
-    
-
-    /**
-     * 根据object类型得到参数占位符个数
-     * @param value
-     * @return
-     */
-    private int getParamsPlaceholder(Object value) {
-        int placeNum = 1;
-        if (value instanceof Collection) {
-            placeNum = ((Collection<?>) value).size();
-        } else if (value.getClass().isArray()) {
-            placeNum = ((Object[]) value).length;
-        }
-        return placeNum;
     }
 
     /**
@@ -233,44 +184,57 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
     }
 
     /**
-     * jdbcTemplate方法删除实体记录
+     * jdbcTemplate方法删除实体记录，需要实体主键字段使用@Id标注
      * @param id
      * @return
      */
     public int deleteById(Serializable id){
-        String sql = "delete from " +  this.tableName +" where id=? ";
+        String sql = "delete from " +  this.tableName +" where "+getIdColumn(this.entityClass)+"=? ";
         return this.getJdbcTemplate().update(sql, id);
-    }
-    
-    /**
-     * 通过唯一key值删除实体记录
-     * @param entity
-     * @return
-     */
-    public int deleteByUniqueKey(T entity){
-        SqlBuilder sqlBuilder = new SqlBuilder(entity).build();
-        return delete(sqlBuilder);
     }
     
 
     /**
-     * 与 deleteByUniqueKey()相同
+     * jdbcTemplate 方法通过实体删除, 实体字段必须有@id注解
      * @param entity
      * @return
      */
-    public int delete(T entity){
-        return deleteByUniqueKey(entity);
+    public int delete(T entity) {
+        EntityDefBean entityDef = EntityDefManager.getDef(this.entityClass);
+        String keyPropName = entityDef.getUniqueKeyPropName();
+        Assert.hasLength(keyPropName, "not found uniqueKeyPropName at entity : " + entityClass.getCanonicalName());
+        String idColumn = entityDef.getPropColumnMap().get(keyPropName);
+        String sql = "delete from " + this.tableName + " where " + idColumn + "=? ";
+        Field keyPropField = entityDef.getPropFieldMap().get(keyPropName);
+        return this.getJdbcTemplate().update(sql, FieldUtil.getValue(keyPropField, entity));
     }
     
     /**
-     * jdbcTemplate 通过SqlBuilder构建器 删除实体记录
-     * @param id
+     * jdbcTemplate 通过实体属性值删除对应记录
+     * @param entity
      * @return
      */
-    public int delete(SqlBuilder sqlBuilder){
-        return this.update(sqlBuilder.getDeleteSql(), sqlBuilder.getUniqueKeyValue());
+    public int deleteByPropValue(T entity){
+        SqlBuilder sqlBuilder = new SqlBuilder(entity).build();
+        return this.update(sqlBuilder.getDeleteSql(), sqlBuilder.getWhereArgs());
     }
     
+    /**
+     * jdbcTemplate 通过属性名称和对应值删除实体记录<br/>
+     * propValue可以是多个值，不要求uniquePropName 有@id注解
+     * @param entityClass
+     * @param propName
+     * @param propValue
+     * @return
+     */
+    public int delete(Class<? extends BaseEntity> entityClass, SqlPropertyValue... findCondits) {
+        String sql = "delete from " + this.tableName + " where ";
+        SqlBuilder sqlBuilder = new SqlBuilder(entityClass).where(findCondits);
+        Object[] args = sqlBuilder.getWhereArgs();
+        Assert.notEmpty(args);
+        return this.update(sql + sqlBuilder.getWhereCondition(), args);
+    }
+
     /**
      * JdbcTemplate 更新记录
      * @param sql
@@ -293,7 +257,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
     }
     
     /**
-     * JdbcTemplate 更新实体记录到数据库
+     * JdbcTemplate 更新实体记录到数据库, 实体主键必须用@id标注
      * @param entity
      * @return 
      */

@@ -57,7 +57,7 @@ public enum SqlConditionDef {
     /**
      * 通过not in进行操作(传入的参数应该为子查询)
      */
-    NOTIN(" not in "),
+    NOT_IN(" not in "),
     /**
      * 查询条件为null
      */
