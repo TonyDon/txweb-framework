@@ -78,7 +78,6 @@ public class SqlBuilder{
         Map<String, String> propNameColumnMap = entityDef.getPropColumnMap();
         sqlColumns = new ArrayList<String>();
         sqlParams = new ArrayList<Object>();
-        Field uniqueKeField = null;
         Object uniquePropVal = null;
         String uniquePropName = entityDef.getUniqueKeyPropName();
         for (Map.Entry<String, Field> pf : propNameFieldMap.entrySet()) {
@@ -87,14 +86,13 @@ public class SqlBuilder{
             Object val = FieldUtil.getValue(propField, entity);
             String col = propNameColumnMap.get(propName);
             if (propName.equals(uniquePropName)) {
-                uniqueKeField = propField;
                 uniquePropVal = val;
             } else if (null != val && null != col) {
                 sqlColumns.add(col);
                 sqlParams.add(val);
             }
         }
-        if (null == uniqueKeyName && null != uniqueKeField && null != uniquePropVal) {
+        if (null == uniqueKeyName && null != uniquePropVal) {
             uniqueKeyName = propNameColumnMap.get(uniquePropName);
             uniqueKeyValue = uniquePropVal;
         }
