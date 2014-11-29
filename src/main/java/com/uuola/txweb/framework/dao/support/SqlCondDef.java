@@ -48,7 +48,7 @@ public enum SqlCondDef {
     /**
      * 忽略查询条件
      */
-    IGNORE(""),
+    IGNORE(" "),
     
     /**
      * 通过IN操作进行查询,IN内部可以使用子查询
