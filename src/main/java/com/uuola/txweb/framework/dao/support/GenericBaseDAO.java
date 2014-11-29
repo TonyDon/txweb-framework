@@ -117,7 +117,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @param keys
      * @return
      */
-    public List<T> getByKeys(List<Object> keys) {
+    public List<T> getByKeys(List<? extends Serializable> keys) {
         int size = keys.size();
         String sql = "select * from " + this.tableName + " where " + getIdColumn(this.entityClass) + " in ("
                 + StringUtil.getPlaceholder(size) + ") ";
