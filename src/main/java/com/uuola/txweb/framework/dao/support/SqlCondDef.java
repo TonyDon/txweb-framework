@@ -14,7 +14,7 @@ package com.uuola.txweb.framework.dao.support;
  * 创建日期: 2014-11-9
  * </pre>
  */
-public enum SqlConditionDef {
+public enum SqlCondDef {
 
     /**
      * 查询条件等于参数值
@@ -73,7 +73,7 @@ public enum SqlConditionDef {
     
     private String sqlTag;
     
-    SqlConditionDef(String sqlTag){
+    SqlCondDef(String sqlTag){
         this.sqlTag = sqlTag;
     }
     

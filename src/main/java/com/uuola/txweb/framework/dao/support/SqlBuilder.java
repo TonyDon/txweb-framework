@@ -235,14 +235,14 @@ public class SqlBuilder{
      * @return
      */
     private static String autoCheckConditionTag(boolean isMultipleParam, SqlPropValue pv) {
-        SqlConditionDef actualCondTag = pv.getFilterCondition();
+        SqlCondDef actualCondTag = pv.getFilterCondition();
         if(isMultipleParam){
             switch(pv.getFilterCondition()){
                 case EQUAL : 
-                    actualCondTag = SqlConditionDef.IN;
+                    actualCondTag = SqlCondDef.IN;
                     break;
                 case NOT_EQUAL : 
-                    actualCondTag = SqlConditionDef.NOT_IN;
+                    actualCondTag = SqlCondDef.NOT_IN;
                     break;
                 default:
                     break;

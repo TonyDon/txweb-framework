@@ -23,24 +23,24 @@ public class SqlPropValue {
     private Object value;
     
     // 判断条件, 默认: EQUAL 属性名=查询值
-    private SqlConditionDef filterCondition;
+    private SqlCondDef filterCondition;
     
     // 多属性关联条件,默认 null, 仅限于: and , or
-    private SqlConditionDef relationCondition;
+    private SqlCondDef relationCondition;
     
     public SqlPropValue(String name, Object value){
         this.propertyName = name;
         this.value = value;
-        this.filterCondition = SqlConditionDef.EQUAL;
+        this.filterCondition = SqlCondDef.EQUAL;
     }
     
-    public SqlPropValue(String name, Object value, SqlConditionDef filterCondition){
+    public SqlPropValue(String name, Object value, SqlCondDef filterCondition){
         this.propertyName = name;
         this.value = value;
         this.filterCondition = filterCondition;
     }
     
-    public SqlPropValue(String name, Object value, SqlConditionDef filterCondition, SqlConditionDef relationCondition){
+    public SqlPropValue(String name, Object value, SqlCondDef filterCondition, SqlCondDef relationCondition){
         this.propertyName = name;
         this.value = value;
         this.filterCondition = filterCondition;
@@ -69,23 +69,23 @@ public class SqlPropValue {
     }
 
     
-    public SqlConditionDef getFilterCondition() {
+    public SqlCondDef getFilterCondition() {
         return filterCondition;
     }
 
     
-    public SqlPropValue setFilterCondition(SqlConditionDef filterCondition) {
+    public SqlPropValue setFilterCondition(SqlCondDef filterCondition) {
         this.filterCondition = filterCondition;
         return this;
     }
 
     
-    public SqlConditionDef getRelationCondition() {
+    public SqlCondDef getRelationCondition() {
         return relationCondition;
     }
 
     
-    public SqlPropValue setRelationCondition(SqlConditionDef relationCondition) {
+    public SqlPropValue setRelationCondition(SqlCondDef relationCondition) {
         this.relationCondition = relationCondition;
         return this;
     }
