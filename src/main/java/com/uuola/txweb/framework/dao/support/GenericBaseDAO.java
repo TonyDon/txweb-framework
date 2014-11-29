@@ -144,7 +144,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @return  
      */
     public List<T> findByPropValue(String propertyName, Object conditionValue){
-        SqlPropertyValue pv = new SqlPropertyValue(propertyName, conditionValue);
+        SqlPropValue pv = new SqlPropValue(propertyName, conditionValue);
         return findByProperty(null, pv);
     }
     
@@ -154,7 +154,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @param findCondits
      * @return
      */
-    public List<T> findByProperty(String[] selectPropertys, SqlPropertyValue... findCondits) {
+    public List<T> findByProperty(String[] selectPropertys, SqlPropValue... findCondits) {
         Assert.notEmpty(findCondits);
         Map<String, String> propColumnMap = EntityDefManager.getDef(this.entityClass).getPropColumnMap();
         String queryColumn = ObjectUtils.isEmpty(selectPropertys) ? " * " : getQueryColumn(selectPropertys,
@@ -195,7 +195,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
     
 
     /**
-     * jdbcTemplate 方法通过实体删除, 实体字段必须有@id注解
+     * jdbcTemplate 方法通过实体删除, 实体字段必须有@id注解的字段
      * @param entity
      * @return
      */
@@ -216,20 +216,18 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      */
     public int deleteByPropValue(T entity){
         SqlBuilder sqlBuilder = new SqlBuilder(entity).build();
-        return this.update(sqlBuilder.getDeleteSql(), sqlBuilder.getWhereArgs());
+        return this.update(sqlBuilder.getDeleteSql(), sqlBuilder.getSqlParams());
     }
     
     /**
      * jdbcTemplate 通过属性名称和对应值删除实体记录<br/>
-     * propValue可以是多个值，不要求uniquePropName 有@id注解
-     * @param entityClass
-     * @param propName
-     * @param propValue
+     * propValue可以是多个值，不要求uniquePropName 有@id注解,慎用，可能会将符合条件的值都删除
+     * @param findCondits
      * @return
      */
-    public int delete(Class<? extends BaseEntity> entityClass, SqlPropertyValue... findCondits) {
+    public int delete(SqlPropValue... findCondits) {
         String sql = "delete from " + this.tableName + " where ";
-        SqlBuilder sqlBuilder = new SqlBuilder(entityClass).where(findCondits);
+        SqlBuilder sqlBuilder = new SqlBuilder(this.entityClass).where(findCondits);
         Object[] args = sqlBuilder.getWhereArgs();
         Assert.notEmpty(args);
         return this.update(sql + sqlBuilder.getWhereCondition(), args);

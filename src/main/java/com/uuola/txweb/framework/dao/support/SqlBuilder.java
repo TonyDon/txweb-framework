@@ -67,7 +67,8 @@ public class SqlBuilder{
     }
     
     /**
-     * 通过实体类构建SQL所需参数
+     * 通过实体类构建SQL所需参数<br/>
+     * 主键与非主键字段分别存储
      */
     public SqlBuilder build() {
         Assert.notNull(this.entity, "Entity must not be null!");
@@ -138,37 +139,25 @@ public class SqlBuilder{
     }
     
     /**
-     * 构建SQL删除预处理语句，结合build方法使用<br/>
-     * 如果不通过build方式，需要手动设置实体属性值
+     * 构建SQL删除预处理语句，结合build方法使用
      * @return
      */
     public String getDeleteSql() {
         StringBuilder sql = new StringBuilder("DELETE FROM ");
         sql.append(this.getTableName()).append(" WHERE ");
-        if (StringUtil.isNotEmpty(this.uniqueKeyName) && null != this.uniqueKeyValue) {
-            // 如果主键存在且有值，直接使用该字段进行删除
-            SqlPropertyValue pv = new SqlPropertyValue(this.uniqueKeyName, this.uniqueKeyValue);
-            this.where(pv);
-        } else {
-            Assert.notEmpty(this.sqlColumns);
-            // 如果不存在主键，但是其他值有值，尝试使用其他属性值进行条件删除
-            int count = this.sqlColumns.size();
-            SqlPropertyValue[] pvArray = new SqlPropertyValue[count];
-            int lastColIndex = count - 1;
-            for (int i = 0; i < lastColIndex; i++) {
-                // 默认条件为列名equal值
-                SqlPropertyValue pv = new SqlPropertyValue(this.sqlColumns.get(i), this.sqlParams.get(i));
-                // 存在下一个关联条件
-                pv.setRelationCondition(SqlConditionDef.AND);
-                pvArray[i] = pv;
-            }
-            // 最后一个条件
-            SqlPropertyValue endPv = new SqlPropertyValue(this.sqlColumns.get(lastColIndex),
-                    this.sqlParams.get(lastColIndex));
-            pvArray[lastColIndex] = endPv;
-            this.where(pvArray);
+        if (StringUtil.isNotEmpty(uniqueKeyName) && null != uniqueKeyValue) {
+            // 添加主键列名 和值
+            sqlColumns.add(uniqueKeyName);
+            sqlParams.add(uniqueKeyValue);
         }
-        return sql.append(this.getWhereCondition()).toString();
+        Assert.notEmpty(this.sqlColumns);
+        int count = this.sqlColumns.size();
+        int lastColIndex = count - 1;
+        for (int k = 0; k < lastColIndex; k++) {
+            sql.append(this.sqlColumns.get(k)).append("=? and ");
+        }
+        sql.append(this.sqlColumns.get(lastColIndex)).append("=? ");
+        return sql.toString();
     }
 
     /**
@@ -176,7 +165,7 @@ public class SqlBuilder{
      * @param findCondits
      * @return
      */
-    public SqlBuilder where(SqlPropertyValue... findCondits) {
+    public SqlBuilder where(SqlPropValue... findCondits) {
         Object[] valueArgs = null;
         int conditsCount = findCondits.length;
         Class<? extends BaseEntity> clazz = null == entity ? this.entityClass : (Class<? extends BaseEntity>) entity
@@ -185,19 +174,19 @@ public class SqlBuilder{
         // where ...
         StringBuilder sql = new StringBuilder();
         if (1 == conditsCount) {
-            SqlPropertyValue pv = findCondits[0];
+            SqlPropValue pv = findCondits[0];
             sql.append(SqlBuilder.makeProperySqlFragment(clazz, propColumnMap, pv));
             valueArgs = ObjectUtil.getArgsArray(pv.getValue());
 
         } else {
             Object[] params = new Object[conditsCount];
             for (int k = 0; k < conditsCount; k++) {
-                SqlPropertyValue pv = findCondits[k];
+                SqlPropValue pv = findCondits[k];
 
                 sql.append(SqlBuilder.makeProperySqlFragment(clazz, propColumnMap, pv));
                 params[k] = pv.getValue();
 
-                // AND , OR
+                // AND , OR;
                 if (null != pv.getRelationCondition()) {
                     sql.append(pv.getRelationCondition().getTag());
                 }
@@ -216,7 +205,7 @@ public class SqlBuilder{
      * @param pv
      */
     public static StringBuilder makeProperySqlFragment(Class<? extends BaseEntity> entityClass,
-            Map<String, String> propColumnMap, SqlPropertyValue pv) {
+            Map<String, String> propColumnMap, SqlPropValue pv) {
         String columnName = propColumnMap.get(pv.getPropertyName());
         Assert.hasLength(columnName, entityClass.getCanonicalName() + "." + pv.getPropertyName()
                 + " @Column.name must not be null!");
@@ -245,7 +234,7 @@ public class SqlBuilder{
      * @param pv
      * @return
      */
-    private static String autoCheckConditionTag(boolean isMultipleParam, SqlPropertyValue pv) {
+    private static String autoCheckConditionTag(boolean isMultipleParam, SqlPropValue pv) {
         SqlConditionDef actualCondTag = pv.getFilterCondition();
         if(isMultipleParam){
             switch(pv.getFilterCondition()){

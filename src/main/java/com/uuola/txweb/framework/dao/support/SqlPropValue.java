@@ -14,7 +14,7 @@ package com.uuola.txweb.framework.dao.support;
  * 创建日期: 2014-11-9
  * </pre>
  */
-public class SqlPropertyValue {
+public class SqlPropValue {
 
     // 属性名
     private String propertyName;
@@ -28,19 +28,19 @@ public class SqlPropertyValue {
     // 多属性关联条件,默认 null, 仅限于: and , or
     private SqlConditionDef relationCondition;
     
-    public SqlPropertyValue(String name, Object value){
+    public SqlPropValue(String name, Object value){
         this.propertyName = name;
         this.value = value;
         this.filterCondition = SqlConditionDef.EQUAL;
     }
     
-    public SqlPropertyValue(String name, Object value, SqlConditionDef filterCondition){
+    public SqlPropValue(String name, Object value, SqlConditionDef filterCondition){
         this.propertyName = name;
         this.value = value;
         this.filterCondition = filterCondition;
     }
     
-    public SqlPropertyValue(String name, Object value, SqlConditionDef filterCondition, SqlConditionDef relationCondition){
+    public SqlPropValue(String name, Object value, SqlConditionDef filterCondition, SqlConditionDef relationCondition){
         this.propertyName = name;
         this.value = value;
         this.filterCondition = filterCondition;
@@ -74,8 +74,9 @@ public class SqlPropertyValue {
     }
 
     
-    public void setFilterCondition(SqlConditionDef filterCondition) {
+    public SqlPropValue setFilterCondition(SqlConditionDef filterCondition) {
         this.filterCondition = filterCondition;
+        return this;
     }
 
     
@@ -84,8 +85,9 @@ public class SqlPropertyValue {
     }
 
     
-    public void setRelationCondition(SqlConditionDef relationCondition) {
+    public SqlPropValue setRelationCondition(SqlConditionDef relationCondition) {
         this.relationCondition = relationCondition;
+        return this;
     }
 
 }
