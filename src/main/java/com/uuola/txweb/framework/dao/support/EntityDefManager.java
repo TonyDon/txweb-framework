@@ -83,12 +83,12 @@ public class EntityDefManager {
             Field field = propFieldMap.get(propName);
             Assert.notNull(field);
             Column column = field.getAnnotation(Column.class);
-            String columnName = null;
+            String colName = null;
             if (null != column) {
-                if (StringUtil.isEmpty(columnName = column.name())) {
+                if (StringUtil.isEmpty(colName = column.name())) {
                     log.warn("Not Set @Column.name Value ! Entity:[" + defBean.getEntityClassName() + "]");
                 } else {
-                    propColumnMap.put(propName, columnName);
+                    propColumnMap.put(propName, colName);
                 }
             }
             if (!isFoundIdColumn) {
@@ -96,9 +96,12 @@ public class EntityDefManager {
                 Id id = field.getAnnotation(Id.class);
                 if (null != id) {
                     isFoundIdColumn = true;
-                    String fieldName = field.getName();
-                    propColumnMap.put(fieldName, fieldName.equals("id") ? "id" : StringUtil.getUnderscoreName(fieldName));
-                    defBean.setUniqueKeyPropName(fieldName);
+                    // 如果 @Id标注主键没有被@Column标注，则自动转换属性列名关系
+                    if (null == propColumnMap.get(propName)) {
+                        propColumnMap.put(propName,
+                                propName.equals("id") ? "id" : StringUtil.getUnderscoreName(propName));
+                    }
+                    defBean.setUniqueKeyPropName(propName);
                 }
             }
         }

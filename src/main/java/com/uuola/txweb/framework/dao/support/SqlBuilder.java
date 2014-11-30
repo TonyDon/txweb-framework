@@ -41,12 +41,12 @@ public class SqlBuilder{
     /**
      * 唯一字段名
      */
-    private String uniqueKeyName;
+    private String uniqueColName;
     
     /**
      * 唯一字段值
      */
-    private Object uniqueKeyValue;
+    private Object uniqueColValue;
     
     private Class<? extends BaseEntity> entityClass;
     
@@ -93,9 +93,9 @@ public class SqlBuilder{
                 sqlParams.add(val);
             }
         }
-        if (null == uniqueKeyName && null != uniquePropVal) {
-            uniqueKeyName = propNameColumnMap.get(uniquePropName);
-            uniqueKeyValue = uniquePropVal;
+        if (null == uniqueColName && null != uniquePropVal) {
+            uniqueColName = propNameColumnMap.get(uniquePropName);
+            uniqueColValue = uniquePropVal;
         }
         return this;
     }
@@ -106,9 +106,9 @@ public class SqlBuilder{
      */
     public String getInsertSql() {
         Assert.notNull(this.sqlColumns, "sqlColumns must not be null!");
-        if (null != this.uniqueKeyName && null != this.uniqueKeyValue) {
-            sqlColumns.add(this.uniqueKeyName);
-            sqlParams.add(this.uniqueKeyValue);
+        if (null != this.uniqueColName && null != this.uniqueColValue) {
+            sqlColumns.add(this.uniqueColName);
+            sqlParams.add(this.uniqueColValue);
         }
         StringBuilder sql = new StringBuilder("INSERT INTO ");
         sql.append(this.getTableName()).append("(");
@@ -123,8 +123,8 @@ public class SqlBuilder{
      * @return
      */
     public String getUpdateSql() {
-        Assert.notNull(this.uniqueKeyName, "uniqueKeyName must not be null!");
-        Assert.notNull(this.uniqueKeyValue, "uniqueKeyValue must not be null!");
+        Assert.notNull(this.uniqueColName, "uniqueColName must not be null!");
+        Assert.notNull(this.uniqueColValue, "uniqueColValue must not be null!");
         StringBuilder sql = new StringBuilder("UPDATE ");
         sql.append(this.getTableName()).append(" SET ");
         int colCount = sqlColumns.size();
@@ -133,8 +133,8 @@ public class SqlBuilder{
             sql.append(sqlColumns.get(k)).append("=?").append(",");
         }
         sql.append(sqlColumns.get(lastColIndex)).append("=?");
-        sql.append(" WHERE ").append(this.uniqueKeyName).append("=?");
-        sqlParams.add(this.uniqueKeyValue);// append where condition to last
+        sql.append(" WHERE ").append(this.uniqueColName).append("=?");
+        sqlParams.add(this.uniqueColValue);// append where condition to last
         return sql.toString();
     }
     
@@ -145,10 +145,10 @@ public class SqlBuilder{
     public String getDeleteSql() {
         StringBuilder sql = new StringBuilder("DELETE FROM ");
         sql.append(this.getTableName()).append(" WHERE ");
-        if (StringUtil.isNotEmpty(uniqueKeyName) && null != uniqueKeyValue) {
+        if (StringUtil.isNotEmpty(uniqueColName) && null != uniqueColValue) {
             // 添加主键列名 和值
-            sqlColumns.add(uniqueKeyName);
-            sqlParams.add(uniqueKeyValue);
+            sqlColumns.add(uniqueColName);
+            sqlParams.add(uniqueColValue);
         }
         Assert.notEmpty(this.sqlColumns);
         int count = this.sqlColumns.size();
@@ -296,23 +296,23 @@ public class SqlBuilder{
     }
 
     
-    public String getUniqueKeyName() {
-        return uniqueKeyName;
+    public String getUniqueColName() {
+        return uniqueColName;
     }
 
     
-    public void setUniqueKeyName(String uniqueKeyName) {
-        this.uniqueKeyName = uniqueKeyName;
+    public void setUniqueColName(String uniqueColName) {
+        this.uniqueColName = uniqueColName;
     }
 
     
-    public Object getUniqueKeyValue() {
-        return uniqueKeyValue;
+    public Object getUniqueColValue() {
+        return uniqueColValue;
     }
 
     
-    public void setUniqueKeyValue(Object uniqueKeyValue) {
-        this.uniqueKeyValue = uniqueKeyValue;
+    public void setUniqueColValue(Object uniqueColValue) {
+        this.uniqueColValue = uniqueColValue;
     }
 
     
