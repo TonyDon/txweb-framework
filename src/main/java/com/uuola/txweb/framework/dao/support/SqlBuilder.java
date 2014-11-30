@@ -147,6 +147,8 @@ public class SqlBuilder{
         sql.append(this.getTableName()).append(" WHERE ");
         if (StringUtil.isNotEmpty(uniqueColName) && null != uniqueColValue) {
             // 添加主键列名 和值
+            sqlColumns.clear();
+            sqlParams.clear();
             sqlColumns.add(uniqueColName);
             sqlParams.add(uniqueColValue);
         }
