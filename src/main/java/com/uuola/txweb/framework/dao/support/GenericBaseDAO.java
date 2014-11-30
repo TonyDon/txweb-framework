@@ -15,6 +15,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +33,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
+import com.uuola.commons.CollectionUtil;
 import com.uuola.commons.ObjectUtil;
 import com.uuola.commons.StringUtil;
 import com.uuola.commons.constant.CST_CHAR;
@@ -114,14 +116,33 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
     
     /**
      * jdbcTemplate 工具通过多主键值查询实体记录
-     * @param keys
+     * @param keys 主键集合
      * @return
      */
     public List<T> getByKeys(List<? extends Serializable> keys) {
+        if(CollectionUtil.isEmpty(keys)){
+            return Collections.emptyList();
+        }
         int size = keys.size();
         String sql = "select * from " + this.tableName + " where " + getIdColumn(this.entityClass) + " in ("
-                + StringUtil.getPlaceholder(size) + ") ";
+                + StringUtil.getPlaceholder(size) + ")";
         return this.getJdbcTemplate().query(sql, ObjectUtil.getArgsArray(keys),
+                new RowMapperResultSetExtractor<T>(BeanPropertyRowMapper.newInstance(this.entityClass), size));
+    }
+    
+    /**
+     * jdbcTemplate 工具通过多主键值查询实体记录
+     * @param keys 主键数组
+     * @return
+     */
+    public List<T> getByKeys(Serializable... keys) {
+        if(ObjectUtil.isEmpty(keys)){
+            return Collections.emptyList();
+        }
+        int size = keys.length;
+        String sql = "select * from " + this.tableName + " where " + getIdColumn(this.entityClass) + " in ("
+                + StringUtil.getPlaceholder(size) + ")";
+        return this.getJdbcTemplate().query(sql, keys,
                 new RowMapperResultSetExtractor<T>(BeanPropertyRowMapper.newInstance(this.entityClass), size));
     }
     
