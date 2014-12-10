@@ -4,15 +4,18 @@
  */
 package com.uuola.txweb.framework.utils;
 
-import com.uuola.commons.CollectionUtil;
-import com.uuola.commons.StringUtil;
-import com.uuola.txweb.framework.dto.ValidateDTO;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
+import javax.validation.Validator;
+
+import com.uuola.commons.CollectionUtil;
+import com.uuola.commons.StringUtil;
+import com.uuola.txweb.framework.dto.ValidateDTO;
 
 /**
  * Bean Validate 验证器
@@ -20,6 +23,12 @@ import javax.validation.Validation;
  * @author tangxiaodong
  */
 public class ValidateUtil {
+    
+    private static Validator validator;
+    
+    static{
+        validator = Validation.buildDefaultValidatorFactory().getValidator();
+    }
 
     /**
      * 对bean的所有要求验证的字段进行验证，返回失败的校验集合
@@ -28,7 +37,7 @@ public class ValidateUtil {
      * @return
      */
     public static Set<ConstraintViolation<ValidateDTO>> validate(ValidateDTO bean, Class<?>... groups) {
-        return Validation.buildDefaultValidatorFactory().getValidator().validate(bean, groups);
+        return validator.validate(bean, groups);
     }
 
     /**
@@ -40,7 +49,7 @@ public class ValidateUtil {
      * @return
      */
     public static Set<ConstraintViolation<ValidateDTO>> validateProperty(ValidateDTO bean, String propertyName, Class<?>... groups) {
-        return Validation.buildDefaultValidatorFactory().getValidator().validateProperty(bean, propertyName, groups);
+        return validator.validateProperty(bean, propertyName, groups);
     }
 
     /**
