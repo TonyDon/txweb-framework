@@ -147,6 +147,19 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
     }
     
     /**
+     * jdbcTemplate 根据属性条件查询记录个数
+     * @param findCondits
+     * @return
+     */
+    public Number countByProperty(SqlPropValue... findCondits){
+        Assert.notEmpty(findCondits);
+        String sql = "select count(*) from " + this.tableName + " where ";
+        SqlBuilder sqlBuilder = new SqlBuilder(this.entityClass).where(findCondits);
+        sql += sqlBuilder.getWhereCondition();
+        return this.queryForObject(sql, Number.class, sqlBuilder.getWhereArgs());
+    }
+    
+    /**
      * 得到主键列名
      * @param entityClass
      * @return
