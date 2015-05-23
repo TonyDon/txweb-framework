@@ -12,7 +12,6 @@ import java.lang.reflect.ParameterizedType;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -207,14 +206,17 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @return
      */
     private String getQueryColumn(String[] selectPropertys, Map<String, String> propColumnMap) {
-        List<String> columns = new ArrayList<String>(selectPropertys.length);
-        for (String prop : selectPropertys) {
-            String columnName = propColumnMap.get(prop);
-            Assert.hasLength(columnName, entityClass.getCanonicalName() + "." + prop
+        StringBuilder sb = new StringBuilder();
+        int size = selectPropertys.length-1;
+        for (int i=0; i<size; i++) {
+            String prop = selectPropertys[i];
+            String colName = propColumnMap.get(prop);
+            Assert.hasLength(colName, entityClass.getCanonicalName() + "." + prop
                     + " @Column.name must not be null!");
-            columns.add(columnName);
+            sb.append(colName).append(CST_CHAR.CHAR_COMMA);
         }
-        return StringUtil.join(columns, CST_CHAR.CHAR_COMMA);
+        sb.append(selectPropertys[size]);
+        return sb.toString();
     }
 
     /**
