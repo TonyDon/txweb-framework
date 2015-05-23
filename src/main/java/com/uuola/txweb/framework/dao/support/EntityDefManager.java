@@ -78,7 +78,7 @@ public class EntityDefManager {
         Map<String, String> propColumnMap = new HashMap<String, String>(CollectionUtil.preferedMapSize(propFieldMap
                 .size()));
         boolean isFoundIdColumn = false;
-        for (Map.Entry<String, Field> entry : defBean.getPropFieldMap().entrySet()) {
+        for (Map.Entry<String, Field> entry : propFieldMap.entrySet()) {
             String propName = entry.getKey();
             Field field = propFieldMap.get(propName);
             Assert.notNull(field);
