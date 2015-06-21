@@ -207,15 +207,17 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      */
     private String getQueryColumn(String[] selectPropertys, Map<String, String> propColumnMap) {
         StringBuilder sb = new StringBuilder();
-        int size = selectPropertys.length-1;
-        for (int i=0; i<size; i++) {
+        int size = selectPropertys.length - 1;
+        for (int i = 0; i < size; i++) {
             String prop = selectPropertys[i];
             String colName = propColumnMap.get(prop);
-            Assert.hasLength(colName, entityClass.getCanonicalName() + "." + prop
-                    + " @Column.name must not be null!");
+            Assert.hasLength(colName, entityClass.getCanonicalName() + "." + prop + " @Column.name must not be null!");
             sb.append(colName).append(CST_CHAR.CHAR_COMMA);
         }
-        sb.append(selectPropertys[size]);
+        String prop = selectPropertys[size];
+        String colName = propColumnMap.get(prop);
+        Assert.hasLength(colName, entityClass.getCanonicalName() + "." + prop + " @Column.name must not be null!");
+        sb.append(colName);
         return sb.toString();
     }
 
