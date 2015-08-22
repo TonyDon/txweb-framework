@@ -53,10 +53,13 @@
 	<!-- 如果是txwebfw的表，用@Transactional("txwebfw") -->
 	<tx:annotation-driven transaction-manager="txManager" />
 
-	<!-- scan for mappers and let them be autowired 自动扫描mapper并注入到服务 <bean name="txwebfw_mapperScannerConfigurer" 
-		class="org.mybatis.spring.mapper.MapperScannerConfigurer"> <property name="basePackage" 
-		value="com.uuola.txweb.dao.mapper" /> <property name="sqlSessionFactoryBeanName" 
-		value="txwebfw_sqlSessionFactory"/> </bean> -->
+	<!-- scan for mappers and let them be autowired 自动扫描mapper并注入到服务 
+	<bean name="txwebfw_mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer"> 
+		<property name="basePackage" value="com.uuola.txweb.dao.mapper" /> 
+		<property name="sqlSessionFactoryBeanName" 
+		value="txwebfw_sqlSessionFactory"/> 
+	</bean> 
+	-->
 		
 	<bean id="txwebSqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
 		<qualifier value="txwebSqlSessionTemplate" />

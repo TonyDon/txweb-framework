@@ -12,6 +12,6 @@
 
 	<context:annotation-config />
 	<import resource="classpath:spring-property.xml" />
-	<import resource="classpath:spring-dao.xml" />
+	<import resource="classpath:spring-txweb-dao.xml" />
 
 </beans>
