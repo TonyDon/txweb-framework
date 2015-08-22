@@ -17,21 +17,13 @@ package com.uuola.txweb.framework.dao.support;
  * </pre>
  */
 public interface DBQualifiers {
-
-    /**
-     *  diancai base data
-     *  基础数据库 事务管理器， 会话工厂, 数据源
-     */
-    String DC_BASE_TX = "dc_base_tx";
-    String DC_BASE_SF = "dc_base_sf";
-    String DC_BASE_DS = "dc_base_ds";
     
     /**
      * TXCMS base data
      */
-    String TS_BASE_TX = "txwebfw_tx";
-    String TS_BASE_SF = "txwebfw_sf";
-    String TS_BASE_DS = "txwebfw_ds";
-    String TS_JDBC_TEMPLATE = "txwebJdbcTemplate";
-    String TS_MYBATIS_SESSION_TEMPLATE = "txwebSqlSessionTemplate";
+    String TXWEB_TS = "txwebfw_tx";
+    String TXWEB_SF = "txwebfw_sf";
+    String TXWEB_DS = "txwebfw_ds";
+    String TXWEB_JDBC_TEMPLATE = "txwebJdbcTemplate";
+    String TXWEB_MYBATIS_SQL_TEMPLATE = "txwebSqlSessionTemplate";
 }

@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Transactional(DBQualifiers.TS_BASE_TX)
-public @interface TsBaseTx {
+@Transactional(DBQualifiers.TXWEB_TS)
+public @interface TxWebTs {
 
 }

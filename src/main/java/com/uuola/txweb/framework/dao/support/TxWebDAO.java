@@ -19,17 +19,17 @@ import org.springframework.jdbc.core.JdbcTemplate;
  * 创建日期: 2013-10-5
  * </pre>
  */
-public class TsBaseDAO<T extends BaseEntity>  extends GenericBaseDAO<T> {
+public class TxWebDAO<T extends BaseEntity>  extends GenericBaseDAO<T> {
 
     @Autowired
     public void initSessionFactory(
-            @Qualifier(DBQualifiers.TS_MYBATIS_SESSION_TEMPLATE) SqlSessionTemplate sqlSessionTemplate) {
+            @Qualifier(DBQualifiers.TXWEB_MYBATIS_SQL_TEMPLATE) SqlSessionTemplate sqlSessionTemplate) {
         super.setSqlSessionTemplate(sqlSessionTemplate);
     }
 
     @Autowired
     public void initJdbcTemplate(
-            @Qualifier(DBQualifiers.TS_JDBC_TEMPLATE) JdbcTemplate jdbcTemplate) {
+            @Qualifier(DBQualifiers.TXWEB_JDBC_TEMPLATE) JdbcTemplate jdbcTemplate) {
         super.setJdbcTemplate(jdbcTemplate);
     }
 }
