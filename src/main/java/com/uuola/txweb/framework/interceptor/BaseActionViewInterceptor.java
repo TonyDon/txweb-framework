@@ -28,6 +28,9 @@ public class BaseActionViewInterceptor extends HandlerInterceptorAdapter {
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
             ModelAndView modelAndView) throws Exception {
+        
+        System.out.println(modelAndView == null);
+        System.out.println(modelAndView.getViewName());
 
         if (null != modelAndView && !modelAndView.hasView() && handler instanceof HandlerMethod) {
             HandlerMethod hm = (HandlerMethod) handler;
