@@ -32,7 +32,7 @@ public class BaseActionViewInterceptor extends HandlerInterceptorAdapter {
         System.out.println(modelAndView == null);
         System.out.println(modelAndView.getViewName());
 
-        if (null != modelAndView && !modelAndView.hasView() && handler instanceof HandlerMethod) {
+        if (null != modelAndView && handler instanceof HandlerMethod) {
             HandlerMethod hm = (HandlerMethod) handler;
             Object bean = hm.getBean();
             // 针对继承BaseAction 自动设置视图
