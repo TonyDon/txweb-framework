@@ -136,7 +136,7 @@ public abstract class BaseAction {
      * @param defineSuffixName
      * @return ModelAndView
      */
-    protected ModelAndView assignViewName(ModelAndView mv, String defineSuffixName){
+    public ModelAndView assignViewName(ModelAndView mv, String defineSuffixName){
         mv.setViewName(getViewName(defineSuffixName));
         return mv;
     }
