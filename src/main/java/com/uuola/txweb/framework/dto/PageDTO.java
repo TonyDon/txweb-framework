@@ -41,6 +41,11 @@ public class PageDTO implements Serializable {
 
     public PageDTO() {}
 
+    /**
+     * 当前数据集，总数据条数
+     * @param datas
+     * @param total
+     */
     @SuppressWarnings("rawtypes")
     public PageDTO(Collection datas, int total) {
         if (datas == null) {
