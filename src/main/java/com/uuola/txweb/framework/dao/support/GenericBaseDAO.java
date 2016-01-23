@@ -252,6 +252,17 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
     }
     
     /**
+     * jdbcTemplate方法通过主键批量删除
+     * @param ids
+     * @return
+     */
+    public int deleteByKeys(Object... keys) {
+        String sql = "delete from " + this.tableName + " where " + getIdColumn(this.entityClass) + " in ( "
+                + StringUtil.getPlaceholder(keys.length) + ")";
+        return this.getJdbcTemplate().update(sql, keys);
+    }
+    
+    /**
      * jdbcTemplate 通过实体属性值删除对应记录
      * @param entity
      * @return

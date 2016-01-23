@@ -98,8 +98,7 @@ public class EntityDefManager {
                     isFoundIdColumn = true;
                     // 如果 @Id标注主键没有被@Column标注，则自动转换属性列名关系
                     if (null == propColumnMap.get(propName)) {
-                        propColumnMap.put(propName,
-                                propName.equals("id") ? "id" : StringUtil.getUnderscoreName(propName));
+                        propColumnMap.put(propName, propName.equalsIgnoreCase("id") ? "id" : StringUtil.getUnderscoreName(propName));
                     }
                     defBean.setUniqueKeyPropName(propName);
                 }
