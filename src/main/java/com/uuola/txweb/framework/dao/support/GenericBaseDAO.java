@@ -38,7 +38,6 @@ import com.uuola.commons.StringUtil;
 import com.uuola.commons.constant.CST_CHAR;
 import com.uuola.commons.exception.Assert;
 import com.uuola.commons.reflect.ClassUtil;
-import com.uuola.commons.reflect.FieldUtil;
 import com.uuola.txweb.framework.dao.annotation.MapperNamespace;
 
 
@@ -250,22 +249,6 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
     public int deleteById(Serializable id){
         String sql = "delete from " +  this.tableName +" where "+getIdColumn(this.entityClass)+"=? ";
         return this.getJdbcTemplate().update(sql, id);
-    }
-    
-
-    /**
-     * jdbcTemplate 方法通过实体删除, 实体字段必须有@id注解的字段
-     * @param entity
-     * @return
-     */
-    public int delete(T entity) {
-        EntityDefBean entityDef = EntityDefManager.getDef(this.entityClass);
-        String keyPropName = entityDef.getUniqueKeyPropName();
-        Assert.hasLength(keyPropName, "not found uniqueKeyPropName at entity : " + entityClass.getCanonicalName());
-        String idColumn = entityDef.getPropColumnMap().get(keyPropName);
-        String sql = "delete from " + this.tableName + " where " + idColumn + "=? ";
-        Field keyPropField = entityDef.getPropFieldMap().get(keyPropName);
-        return this.getJdbcTemplate().update(sql, FieldUtil.getValue(keyPropField, entity));
     }
     
     /**
