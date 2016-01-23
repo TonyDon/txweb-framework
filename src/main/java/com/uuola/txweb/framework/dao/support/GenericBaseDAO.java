@@ -145,7 +145,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
         int size = keys.size();
         String sql = "select * from " + this.tableName + " where " + getIdColumn(this.entityClass) + " in ("
                 + StringUtil.getPlaceholder(size) + ")";
-        return this.getJdbcTemplate().query(sql, ObjectUtil.getArgsArray(keys),
+        return this.getJdbcTemplate().query(sql, keys.toArray(),
                 new RowMapperResultSetExtractor<T>(BeanPropertyRowMapper.newInstance(this.entityClass), size));
     }
     
