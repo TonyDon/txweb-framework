@@ -499,7 +499,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @param id
      * @return
      */
-    public T getByMapper(String mapperId, Long id) {
+    public T selectById(String mapperId, Long id) {
         return this.getSqlSession().selectOne(convertMapperId(mapperId), id);
     }
     
@@ -508,8 +508,8 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @param id
      * @return
      */
-    public T getByMapper(Long id){
-        return this.getByMapper("findById", id);
+    public T selectById(Long id){
+        return this.selectById("findById", id);
     }
     
     
