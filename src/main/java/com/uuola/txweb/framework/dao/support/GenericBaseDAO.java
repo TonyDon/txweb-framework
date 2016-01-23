@@ -184,7 +184,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @return
      */
     public String getIdColumn(Class<? extends BaseEntity> entityClass){
-        EntityDefBean entityDef = EntityDefManager.getDef(this.entityClass);
+        EntityDefine entityDef = EntityDefManager.getDef(this.entityClass);
         String keyPropName = entityDef.getUniqueKeyPropName();
         Assert.hasLength(keyPropName, "not found uniqueKeyPropName at entity : " + entityClass.getCanonicalName());
         return entityDef.getPropColumnMap().get(keyPropName);

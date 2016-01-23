@@ -17,7 +17,7 @@ import java.util.Map;
  * 创建日期: 2014-11-12
  * </pre>
  */
-public class EntityDefBean {
+public class EntityDefine {
     
     /**
      * 实体类class
@@ -43,11 +43,6 @@ public class EntityDefBean {
      * 主键属性名
      */
     private String uniqueKeyPropName;
-    
-    /**
-     * 实体类名称
-     */
-    private String entityClassName;
 
     
     public Class<? extends BaseEntity> getEntityClass() {
@@ -101,15 +96,4 @@ public class EntityDefBean {
         this.uniqueKeyPropName = uniqueKeyPropName;
     }
 
-
-    
-    public String getEntityClassName() {
-        return entityClassName;
-    }
-
-
-    
-    public void setEntityClassName(String entityClassName) {
-        this.entityClassName = entityClassName;
-    }
 }

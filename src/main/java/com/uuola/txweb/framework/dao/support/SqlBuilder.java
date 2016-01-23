@@ -73,7 +73,7 @@ public class SqlBuilder{
     public SqlBuilder build() {
         Assert.notNull(this.entity, "Entity must not be null!");
         this.entityClass = (Class<? extends BaseEntity>)entity.getClass();
-        EntityDefBean entityDef = EntityDefManager.getDef(this.entityClass);
+        EntityDefine entityDef = EntityDefManager.getDef(this.entityClass);
         this.tableName = entityDef.getTableName();
         Map<String, Field> propNameFieldMap = entityDef.getPropFieldMap();
         Map<String, String> propNameColumnMap = entityDef.getPropColumnMap();

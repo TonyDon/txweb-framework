@@ -37,27 +37,26 @@ public class EntityDefManager {
     
     private static Logger log = LoggerFactory.getLogger(EntityDefManager.class);
 
-    private static ConcurrentMap<Class<? extends BaseEntity>, EntityDefBean> entityPropContainer = new ConcurrentHashMap<Class<? extends BaseEntity>, EntityDefBean>();
+    private static ConcurrentMap<Class<? extends BaseEntity>, EntityDefine> entityPropContainer = new ConcurrentHashMap<Class<? extends BaseEntity>, EntityDefine>();
 
-    public static EntityDefBean addEntityClass(Class<? extends BaseEntity> clazz) {
-        EntityDefBean defBean = entityPropContainer.get(clazz);
+    public static EntityDefine addEntityClass(Class<? extends BaseEntity> clazz) {
+        EntityDefine defBean = entityPropContainer.get(clazz);
         if (null == defBean) {
             defBean = resolveEntityClass(clazz);
             entityPropContainer.putIfAbsent(clazz, defBean);
-            log.info("add entity class def bean to manager : " + defBean.getEntityClassName());
+            log.info("add entity class def bean to manager : " + clazz.getCanonicalName());
         }
         return defBean;
     }
     
-    public static EntityDefBean getDef(Class<? extends BaseEntity> clazz){
+    public static EntityDefine getDef(Class<? extends BaseEntity> clazz){
         return addEntityClass(clazz);
     }
 
-    private static EntityDefBean resolveEntityClass(Class<? extends BaseEntity> clazz) {
-        EntityDefBean defBean = new EntityDefBean();
+    private static EntityDefine resolveEntityClass(Class<? extends BaseEntity> clazz) {
+        EntityDefine defBean = new EntityDefine();
         defBean.setEntityClass(clazz);
         defBean.setTableName(ClassUtil.getTableName(clazz));
-        defBean.setEntityClassName(clazz.getCanonicalName());
         Map<String, Field> propFieldMap = FieldUtil.getAllAccessibleFieldNameMap(defBean.getEntityClass(),
                 BaseEntity.class);
         Assert.notEmpty(propFieldMap);
@@ -73,7 +72,7 @@ public class EntityDefManager {
      * @param entityClass2
      * @return
      */
-    private  static Map<String, String> getPropertyColumnMap(EntityDefBean defBean) {
+    private  static Map<String, String> getPropertyColumnMap(EntityDefine defBean) {
         Map<String, Field> propFieldMap = defBean.getPropFieldMap();
         Map<String, String> propColumnMap = new HashMap<String, String>(CollectionUtil.preferedMapSize(propFieldMap
                 .size()));
@@ -86,7 +85,7 @@ public class EntityDefManager {
             String colName = null;
             if (null != column) {
                 if (StringUtil.isEmpty(colName = column.name())) {
-                    log.warn("Not Set @Column.name Value ! Entity:[" + defBean.getEntityClassName() + "]");
+                    log.warn("Not Set @Column.name ! Entity:[" + defBean.getEntityClass().getCanonicalName() + "]");
                 } else {
                     propColumnMap.put(propName, colName);
                 }
