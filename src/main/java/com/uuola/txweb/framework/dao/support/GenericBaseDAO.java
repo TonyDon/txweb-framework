@@ -39,6 +39,7 @@ import com.uuola.commons.constant.CST_CHAR;
 import com.uuola.commons.exception.Assert;
 import com.uuola.commons.reflect.ClassUtil;
 import com.uuola.commons.reflect.FieldUtil;
+import com.uuola.txweb.framework.dao.annotation.MapperNamespace;
 
 
 /**
@@ -52,16 +53,22 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
 
     private JdbcTemplate jdbcTemplate;
     
+    // 实体类
     private Class<T> entityClass;
     
+    // entity 表名称
     private String tableName;
+    
+    // mybatis mapper 命名空间
+    private String mapperNamespace;
     
     
     public GenericBaseDAO(){
         setEntityClass();
         initTableName();
+        initMapperNamespace();
     }
-    
+
     public JdbcTemplate getJdbcTemplate() {
         return jdbcTemplate;
     }
@@ -71,8 +78,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
     }
 
     /**
-     * 
-     * @return 查询的实体类
+     * 查询的实体类
      */
     @SuppressWarnings("unchecked")
     private void setEntityClass() {
@@ -82,10 +88,25 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
     
     /**
      * 通过实体获取表名
-     * @return
      */
     private void initTableName(){
         this.tableName = ClassUtil.getTableName(this.entityClass);
+    }
+    
+    /**
+     * 根据mapper 命名空间注解获取mapper namespace值
+     */
+    private void initMapperNamespace() {
+        MapperNamespace mapperNamespace = this.getClass().getAnnotation(MapperNamespace.class);
+        if (null != mapperNamespace) {
+            String namespace = mapperNamespace.value();
+            if (StringUtil.isEmpty(namespace)) {
+                // 类名称则为mapper空间名称
+                this.mapperNamespace = this.getClass().getName();
+            } else {
+                this.mapperNamespace = namespace;
+            }
+        }
     }
     
     /**
@@ -495,11 +516,17 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @param id
      * @return
      */
-    public T getByMapper(String mapperId, Long id){
-        if(null == id){
-            return null;
-        }
-        return this.getSqlSession().selectOne(mapperId, id);
+    public T getByMapper(String mapperId, Long id) {
+        return this.getSqlSession().selectOne(convertMapperId(mapperId), id);
+    }
+    
+    /**
+     * Mybatis 通过ID查询实体，mapperId必须为 findById
+     * @param id
+     * @return
+     */
+    public T getByMapper(Long id){
+        return this.getByMapper("findById", id);
     }
     
     
@@ -510,10 +537,24 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @return
      */
     public int deleteByMapper(String mapperId, Long id){
-        if(null == id){
-            return 0;
-        }
-        return this.getSqlSession().delete(mapperId, id);
+        return this.getSqlSession().delete(convertMapperId(mapperId), id);
+    }
+
+    /**
+     * @param mapperId
+     * @return
+     */
+    protected String convertMapperId(String mapperId) {
+        return this.mapperNamespace + "." + mapperId;
+    }
+    
+    /**
+     * Mybatis 通过ID删除记录，mapperId必须为 deleteById
+     * @param id
+     * @return
+     */
+    public int deleteByMapper(Long id){
+        return this.deleteByMapper("deleteById", id);
     }
     
     /**
@@ -523,7 +564,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @return
      */
     public int updateByMapper(String mapperId, Object parameter){
-        return this.getSqlSession().update(mapperId, parameter);
+        return this.getSqlSession().update(convertMapperId(mapperId), parameter);
     }
     
     /**
@@ -533,7 +574,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @return
      */
     public int insertByMapper(String mapperId, Object parameter){
-        return this.getSqlSession().insert(mapperId, parameter);
+        return this.getSqlSession().insert(convertMapperId(mapperId), parameter);
     }
     
     /**
@@ -543,7 +584,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @return
      */
     public <E> E selectOne(String mapperId, Object parameter){
-        return this.getSqlSession().selectOne(mapperId, parameter);
+        return this.getSqlSession().selectOne(convertMapperId(mapperId), parameter);
     }
     
     /**
@@ -553,6 +594,17 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @return
      */
     public <E> List<E> selectList(String mapperId, Object parameter){
-        return this.getSqlSession().selectList(mapperId, parameter);
+        return this.getSqlSession().selectList(convertMapperId(mapperId), parameter);
+    }
+    
+    /**
+     * Mybatis Select Map Query, 指定map key ，结果将按key
+     * @param mapperId
+     * @param mapKey
+     * @param parameter
+     * @return
+     */
+    public <K, V> Map<K, V> selectMap(String mapperId, Object parameter, String mapKey){
+        return this.getSqlSession().selectMap(convertMapperId(mapperId), parameter, mapKey);
     }
 }

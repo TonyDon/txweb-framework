@@ -7,11 +7,13 @@
 package com.uuola.txweb.test;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
 import javax.persistence.Column;
 
+import org.apache.commons.lang.ClassUtils;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 import org.springframework.util.ReflectionUtils;
@@ -19,6 +21,7 @@ import org.springframework.util.ReflectionUtils;
 import com.uuola.commons.DateUtil;
 import com.uuola.commons.reflect.ClassUtil;
 import com.uuola.commons.reflect.FieldUtil;
+import com.uuola.txweb.framework.action.BaseAction;
 import com.uuola.txweb.framework.dao.support.BaseEntity;
 import com.uuola.txweb.framework.dao.support.SqlBuilder;
 
@@ -64,6 +67,13 @@ public class ClassUtilTest {
         System.out.println(ReflectionUtils.findField(DemoEntity.class, "code").getType().getName());
         System.out.println(sqlBuilder.getInsertSql());
         System.out.println(sqlBuilder.getUpdateSql());
+    }
+    
+    @Test
+    public void test_class_1(){
+        System.out.println(ClassUtils.getPackageName(BaseAction.class));
+        System.out.println(BaseAction.class.getPackage().getName());
+        System.out.println(ClassUtils.getShortClassName(BaseAction.class));
     }
 
 }
