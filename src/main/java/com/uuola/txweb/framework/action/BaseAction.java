@@ -19,7 +19,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.uuola.commons.StringUtil;
 import com.uuola.commons.constant.CST_CHAR;
-import com.uuola.commons.exception.Assert;
 import com.uuola.commons.exception.BusinessException;
 import com.uuola.txweb.framework.action.methods.QueryCallbackHandler;
 import com.uuola.txweb.framework.action.methods.UpdateCallbackHandler;
