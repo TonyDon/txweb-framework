@@ -28,19 +28,23 @@ public class SqlPropValue {
     // 多属性关联条件,默认 null, 仅限于: and , or
     private SqlCondDef relationCondition;
     
+    public SqlPropValue(){
+        
+    }
+    
     public SqlPropValue(String name, Object value){
         this.propertyName = name;
         this.value = value;
         this.filterCondition = SqlCondDef.EQUAL;
     }
     
-    public SqlPropValue(String name, Object value, SqlCondDef filterCondition){
+    public SqlPropValue(String name, SqlCondDef filterCondition, Object value){
         this.propertyName = name;
         this.value = value;
         this.filterCondition = filterCondition;
     }
     
-    public SqlPropValue(String name, Object value, SqlCondDef filterCondition, SqlCondDef relationCondition){
+    public SqlPropValue(String name, SqlCondDef filterCondition, Object value, SqlCondDef relationCondition){
         this.propertyName = name;
         this.value = value;
         this.filterCondition = filterCondition;
@@ -54,8 +58,9 @@ public class SqlPropValue {
     }
 
     
-    public void setPropertyName(String propertyName) {
+    public SqlPropValue setPropertyName(String propertyName) {
         this.propertyName = propertyName;
+        return this;
     }
 
     
@@ -64,8 +69,9 @@ public class SqlPropValue {
     }
 
     
-    public void setValue(Object value) {
+    public SqlPropValue setValue(Object value) {
         this.value = value;
+        return this;
     }
 
     

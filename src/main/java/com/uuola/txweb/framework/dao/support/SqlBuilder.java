@@ -218,7 +218,7 @@ public class SqlBuilder{
         boolean isMultipleParam = placeNum > 1;
         sql.append("(");
         sql.append(columnName);
-        sql.append(autoCheckConditionTag(isMultipleParam,pv));
+        sql.append(parseSqlSymbolByConditionTag(isMultipleParam,pv));
         if (isMultipleParam) {
             sql.append("(");
         }
@@ -236,7 +236,7 @@ public class SqlBuilder{
      * @param pv
      * @return
      */
-    private static String autoCheckConditionTag(boolean isMultipleParam, SqlPropValue pv) {
+    private static String parseSqlSymbolByConditionTag(boolean isMultipleParam, SqlPropValue pv) {
         SqlCondDef actualCondTag = pv.getFilterCondition();
         if(isMultipleParam){
             switch(pv.getFilterCondition()){
