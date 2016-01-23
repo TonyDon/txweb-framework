@@ -49,9 +49,7 @@ public abstract class BaseAction {
         String viewPath = StringUtil.replace(getPackagePath(), "/action", CST_CHAR.STR_EMPTY);
         this.viewPrefixPath = viewPath.concat(CST_CHAR.STR_SLASH).concat(getActionPrefixName())
                 .concat(CST_CHAR.STR_LINE);
-        if (log.isInfoEnabled()) {
-            log.info("viewPrefixPath:" + this.viewPrefixPath + "{SuffixName}-*");
-        }
+        log.info("viewPrefixPath:" + this.viewPrefixPath + "{SuffixName}");
     }
 
     /**
@@ -103,9 +101,8 @@ public abstract class BaseAction {
      */
     private String getPackagePath() {
         String packageName = this.getClass().getPackage().getName();
-        Assert.hasLength(packageName);
         if (StringUtil.endNotWith(packageName, ".action")) {
-            throw new RuntimeException(packageName + "-[Must End With '.action', The Path Of Action Package!]");
+            throw new RuntimeException(packageName + "-[Must End-With '.action', The Path Of Action Package!]");
         }
         return StringUtil.replace(packageName, CST_CHAR.STR_DOT, CST_CHAR.STR_SLASH);
     }
