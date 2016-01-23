@@ -181,10 +181,10 @@ public abstract class BaseAction {
      * 
      * @param query 查询条件
      * @param handler 查询处理外部回调执行者
-     * @param queryResultAttrName 给查询结果定一个属性名称到ModelAndView 若为空则使用结果对象的SimpleName作为属性名
+     * @param resultAttrName 给查询结果定一个属性名称到ModelAndView 若为空则使用结果对象的SimpleName作为属性名
      * @return ModelAndView
      */
-    protected <T> ModelAndView queryAction(BaseQuery query, String queryResultAttrName, QueryCallbackHandler<T> handler) {
+    protected <T> ModelAndView queryAction(BaseQuery query, String resultAttrName, QueryCallbackHandler<T> handler) {
         ModelAndView mv = new ModelAndView();
         if (query.isNeedValid() && !query.validatePass()) {
             List<String> errors = new ArrayList<String>();
@@ -197,14 +197,14 @@ public abstract class BaseAction {
             query.calcCurrRowIndex();
             // 查询返回结果对象如PageDTO
             T result = handler.doQuery(query);
-            if(null == result){
-                result = makeQueryResult(handler);
-                log.debug("Query Result Is Null! Try New Instance." );
-            }
-            if (StringUtil.isEmpty(queryResultAttrName)) {
+            /*
+             * if(null == result){ result = makeQueryResult(handler);
+             * log.debug("Query Result Is Null! Try New Instance." ); }
+             */
+            if (StringUtil.isEmpty(resultAttrName)) {
                 mv.addObject(StringUtils.uncapitalize(result.getClass().getSimpleName()), result);
-            }else{
-                mv.addObject(queryResultAttrName, result);
+            } else {
+                mv.addObject(resultAttrName, result);
             }
         }
         return mv;
@@ -215,7 +215,7 @@ public abstract class BaseAction {
      * @param handler
      * @return
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "unused" })
     private <T> T makeQueryResult(QueryCallbackHandler<T> handler) {
         try {
             // 得到所有泛型接口类型
