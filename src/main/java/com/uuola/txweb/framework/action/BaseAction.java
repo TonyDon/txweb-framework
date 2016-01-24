@@ -38,17 +38,15 @@ public abstract class BaseAction {
     protected Logger log = LoggerFactory.getLogger(getClass());
 
     /**
-     * 根据包路径和Action类构建视图名路径，如： com.uuola.txcms.portal.user.action.UserInfoAction<br/>
-     * 转为 ：<br/>
-     * com/uuola/txcms/portal/user/${actionPrefixName}-${methodName/defineName}
+     * 根据包路径和Action类构建视图名路径，
+     * 如： com.uuola.txcms.portal.user.action.UserInfoAction 
+     * 转为 ：com/uuola/txcms/portal/user/${actionPrefixName}-
      */
     private String viewPrefixPath;
 
     public BaseAction() {
-        String viewPath = StringUtil.replace(getPackagePath(), "/action", CST_CHAR.STR_EMPTY);
-        this.viewPrefixPath = viewPath.concat(CST_CHAR.STR_SLASH).concat(getActionPrefixName())
-                .concat(CST_CHAR.STR_LINE);
-        log.info("viewPath:" + this.viewPrefixPath + "*.*");
+        this.viewPrefixPath = getViewPath().concat(getActionPrefixName()).concat(CST_CHAR.STR_LINE);
+        log.info("viewPath:{}*.*", this.viewPrefixPath);
     }
 
     /**
@@ -89,21 +87,23 @@ public abstract class BaseAction {
         if (actionIdx < 1) {
             throw new RuntimeException(this.getClass().getCanonicalName() + "-[The Class Name Must end with 'Action'!]");
         }
+        
         return StringUtils.uncapitalize(className.substring(0, actionIdx));
     }
 
     /**
-     * 转换包名称为目录路径<br/>
-     * eg: com.uuola.txweb.action → com/uuola/txweb/action
+     * 转换包名称为视图层目录路径<br/>
+     * eg: com.uuola.txweb.user.action → com/uuola/txweb/user/
      * 
      * @return
      */
-    private String getPackagePath() {
+    private String getViewPath() {
         String packageName = this.getClass().getPackage().getName();
         if (StringUtil.endNotWith(packageName, ".action")) {
             throw new RuntimeException(packageName + "-[Must End-With '.action', The Path Of Action Package!]");
         }
-        return StringUtil.replace(packageName, CST_CHAR.STR_DOT, CST_CHAR.STR_SLASH);
+        String viewPath = packageName.substring(0, packageName.lastIndexOf("action"));
+        return StringUtil.replace(viewPath, CST_CHAR.STR_DOT, CST_CHAR.STR_SLASH);
     }
 
     /**
