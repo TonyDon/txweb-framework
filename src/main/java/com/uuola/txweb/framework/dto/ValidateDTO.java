@@ -29,9 +29,9 @@ public abstract class ValidateDTO implements Serializable {
     private boolean validPass = true;
     
     /**
-     * 默认需要验证
+     * 默认不需要验证
      */
-    private boolean isNeedValid = true; 
+    private boolean isNeedValid = false; 
 
     /**
      * 验证dto所有字段方法，通过返回true 否则返回false
