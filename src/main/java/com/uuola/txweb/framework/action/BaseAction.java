@@ -48,7 +48,7 @@ public abstract class BaseAction {
         String viewPath = StringUtil.replace(getPackagePath(), "/action", CST_CHAR.STR_EMPTY);
         this.viewPrefixPath = viewPath.concat(CST_CHAR.STR_SLASH).concat(getActionPrefixName())
                 .concat(CST_CHAR.STR_LINE);
-        log.info("viewPrefixPath:" + this.viewPrefixPath + "{SuffixName}");
+        log.info("viewPrefixPath:" + this.viewPrefixPath + "*");
     }
 
     /**
