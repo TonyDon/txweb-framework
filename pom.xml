@@ -12,7 +12,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java-version>1.7</java-version>
-		<org.springframework-version>3.2.15.RELEASE</org.springframework-version>
+		<org.springframework-version>3.2.16.RELEASE</org.springframework-version>
 		<org.aspectj-version>1.6.10</org.aspectj-version>
 		<com.thoughtworks.xstream-version>1.4.3</com.thoughtworks.xstream-version>
 		<org.mybatis-version>3.3.0</org.mybatis-version>
