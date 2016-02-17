@@ -267,7 +267,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @param entity
      * @return
      */
-    public int deleteByPropValue(T entity){
+    public int deleteByEntity(T entity){
         SqlBuilder sqlBuilder = new SqlBuilder(entity).build();
         return this.update(sqlBuilder.getDeleteSql(), sqlBuilder.getSqlParams());
     }
