@@ -128,7 +128,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      */
     public T get(Serializable id) {
         String sql = "select * from " + this.tableName + " where " + getIdColumn(this.entityClass) + "=? ";
-        List<T> list = this.getJdbcTemplate().query(sql, new Object[] { id },
+        List<T> list = this.jdbcTemplate.query(sql, new Object[] { id },
                 new RowMapperResultSetExtractor<T>(BeanPropertyRowMapper.newInstance(this.entityClass), 1));
         return extractSingleObject(list);
     }
@@ -145,7 +145,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
         int size = keys.size();
         String sql = "select * from " + this.tableName + " where " + getIdColumn(this.entityClass) + " in ("
                 + StringUtil.getPlaceholder(size) + ")";
-        return this.getJdbcTemplate().query(sql, keys.toArray(),
+        return this.jdbcTemplate.query(sql, keys.toArray(),
                 new RowMapperResultSetExtractor<T>(BeanPropertyRowMapper.newInstance(this.entityClass), size));
     }
     
@@ -161,7 +161,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
         int size = keys.length;
         String sql = "select * from " + this.tableName + " where " + getIdColumn(this.entityClass) + " in ("
                 + StringUtil.getPlaceholder(size) + ")";
-        return this.getJdbcTemplate().query(sql, keys,
+        return this.jdbcTemplate.query(sql, keys,
                 new RowMapperResultSetExtractor<T>(BeanPropertyRowMapper.newInstance(this.entityClass), size));
     }
     
@@ -215,7 +215,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
         String sql = "select " + queryColumn + " from " + this.tableName + " where ";
         SqlBuilder sqlBuilder = new SqlBuilder(this.entityClass).where(findCondits);
         sql += sqlBuilder.getWhereCondition();
-        return this.getJdbcTemplate().query(sql, sqlBuilder.getWhereArgs(),
+        return this.jdbcTemplate.query(sql, sqlBuilder.getWhereArgs(),
                 BeanPropertyRowMapper.newInstance(this.entityClass));
     }
 
@@ -248,7 +248,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      */
     public int deleteById(Serializable id){
         String sql = "delete from " +  this.tableName +" where "+getIdColumn(this.entityClass)+"=? ";
-        return this.getJdbcTemplate().update(sql, id);
+        return this.jdbcTemplate.update(sql, id);
     }
     
     /**
@@ -259,7 +259,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
     public int deleteByKeys(Object... keys) {
         String sql = "delete from " + this.tableName + " where " + getIdColumn(this.entityClass) + " in ( "
                 + StringUtil.getPlaceholder(keys.length) + ")";
-        return this.getJdbcTemplate().update(sql, keys);
+        return this.jdbcTemplate.update(sql, keys);
     }
     
     /**
@@ -304,7 +304,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @return
      */
     public int update(String sql, Object... params){
-        return this.getJdbcTemplate().update(sql, params);
+        return this.jdbcTemplate.update(sql, params);
     }
     
     /**
@@ -439,7 +439,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @return
      */
     public Map<String, Object> queryForMap(String sql, Object... params) {
-        List<Map<String, Object>> results = this.getJdbcTemplate().query(sql, params,
+        List<Map<String, Object>> results = this.jdbcTemplate.query(sql, params,
                 new RowMapperResultSetExtractor<Map<String, Object>>(new ColumnMapRowMapper(), 1));
         return extractSingleObject(results);
     }
@@ -467,7 +467,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @return
      */
     public <E> E queryForObject(String sql, Class<E> requiredType, Object... params) {
-        List<E> results = this.getJdbcTemplate().query(sql, params,
+        List<E> results = this.jdbcTemplate.query(sql, params,
                 new RowMapperResultSetExtractor<E>(new SingleColumnRowMapper<E>(requiredType)));
         return extractSingleObject(results);
     }
@@ -490,7 +490,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @throws SQLException 
      */
     public List<Map<String, Object>> executeQuery(String sql, Object... params){
-        return this.getJdbcTemplate().queryForList(sql, params);
+        return this.jdbcTemplate.queryForList(sql, params);
     }
     
     /**
@@ -501,7 +501,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @return
      */
     public <E> List<E> executeQuery(String sql, Class<E> clazz, Object... params ){
-        return this.getJdbcTemplate().query(sql, params, BeanPropertyRowMapper.newInstance(clazz));
+        return this.jdbcTemplate.query(sql, params, BeanPropertyRowMapper.newInstance(clazz));
     }
     
 
