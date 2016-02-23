@@ -224,6 +224,7 @@ public abstract class BaseAction {
                     // 判断泛型类型的声明类是否匹配
                     if (((ParameterizedType) type).getRawType() == QueryCallbackHandler.class) {
                         pType = (ParameterizedType) type;
+                        break;
                     }
                 }
             }
