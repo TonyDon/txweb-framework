@@ -40,12 +40,12 @@ public abstract class BaseAction {
     /**
      * 根据包路径和Action类构建视图名路径，
      * 如： com.uuola.txcms.portal.user.action.UserInfoAction 
-     * 转为 ：com/uuola/txcms/portal/user/${actionPrefixName}-
+     * 转为 ：com.uuola.txcms.portal.user/userInfo-*.*
      */
     private String viewPrefixPath;
 
     public BaseAction() {
-        this.viewPrefixPath = getViewPath().concat(getActionPrefixName()).concat(CST_CHAR.STR_LINE);
+        this.viewPrefixPath = getViewPath().concat(CST_CHAR.STR_SLASH).concat(getActionPrefixName()).concat(CST_CHAR.STR_LINE);
         log.info("viewPath:{}*.*", this.viewPrefixPath);
     }
 
@@ -93,7 +93,7 @@ public abstract class BaseAction {
 
     /**
      * 转换包名称为视图层目录路径<br/>
-     * eg: com.uuola.txweb.user.action → com/uuola/txweb/user/
+     * eg: com.uuola.txweb.user.action → com.uuola.txweb.user
      * 
      * @return
      */
@@ -102,8 +102,7 @@ public abstract class BaseAction {
         if (StringUtil.endNotWith(packageName, ".action")) {
             throw new RuntimeException(packageName + "-[Must End-With '.action', The Path Of Action Package!]");
         }
-        String viewPath = packageName.substring(0, packageName.lastIndexOf("action"));
-        return StringUtil.replace(viewPath, CST_CHAR.STR_DOT, CST_CHAR.STR_SLASH);
+        return packageName.substring(0, packageName.lastIndexOf("action")-1);
     }
 
     /**
