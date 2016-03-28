@@ -552,6 +552,27 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
     }
     
     /**
+     * Mybatis 删除记录
+     * @param mapperId
+     * @param parameter
+     * @return
+     */
+    public int deleteByMapper(String mapperId){
+        return this.getSqlSession().delete(convertMapperId(mapperId));
+    }
+    
+    /**
+     * Mybatis 删除记录
+     * @param mapperId
+     * @param parameter
+     * @return
+     */
+    public int deleteByMapper(String mapperId, Object parameter){
+        return this.getSqlSession().delete(convertMapperId(mapperId), parameter);
+    }
+    
+    
+    /**
      *  Mybatis Update
      * @param mapperId
      * @param parameter
