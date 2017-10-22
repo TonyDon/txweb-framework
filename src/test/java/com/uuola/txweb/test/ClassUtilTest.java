@@ -7,7 +7,6 @@
 package com.uuola.txweb.test;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
@@ -19,10 +18,10 @@ import org.junit.Test;
 import org.springframework.util.ReflectionUtils;
 
 import com.uuola.commons.DateUtil;
-import com.uuola.commons.reflect.ClassUtil;
 import com.uuola.commons.reflect.FieldUtil;
 import com.uuola.txweb.framework.action.BaseAction;
-import com.uuola.txweb.framework.dao.support.BaseEntity;
+import com.uuola.txweb.framework.dao.support.EntityDefManager;
+import com.uuola.txweb.framework.dao.support.EntityDefine;
 import com.uuola.txweb.framework.dao.support.SqlMaker;
 
 
@@ -45,9 +44,9 @@ public class ClassUtilTest {
     
     @Test
     public void test_table_column(){
-        BaseEntity de = new DemoEntity();
-        ((DemoEntity)de).setCitycode("00000123");
-        Collection<Field> fset = FieldUtil.getAllAccessibleFieldList(de.getClass(), BaseEntity.class);
+        DemoEntity de = new DemoEntity();
+        de.setCitycode("00000123");
+        Collection<Field> fset = FieldUtil.getAllAccessibleFields(de.getClass());
         for (Field f : fset)
             System.out.println(f.getAnnotation(Column.class) == null ? f.getName() : f.getAnnotation(Column.class)
                     .name());
@@ -63,7 +62,8 @@ public class ClassUtilTest {
         de.setCode("000000123");
         de.setGender((byte)1);
         de.setBirthday(new Date());
-        SqlMaker sqlBuilder = new SqlMaker(de).build();
+        EntityDefine entityDef = EntityDefManager.getDef(DemoEntity.class);
+        SqlMaker sqlBuilder = new SqlMaker(entityDef).build(de);
         System.out.println(ReflectionUtils.findField(DemoEntity.class, "code").getType().getName());
         System.out.println(sqlBuilder.getInsertSql());
         System.out.println(sqlBuilder.getUpdateSql());
