@@ -22,7 +22,7 @@ public class EntityDefine {
     /**
      * 实体类class
      */
-    private Class<? extends BaseEntity> entityClass;
+    private Class<?> entityClass;
 
     /**
      * 对应表名称
@@ -43,14 +43,19 @@ public class EntityDefine {
      * 主键属性名
      */
     private String uniqueKeyPropName;
+    
+    /**
+     * 主键ID列名
+     */
+    private String idColumnName;
 
     
-    public Class<? extends BaseEntity> getEntityClass() {
+    public Class<?> getEntityClass() {
         return entityClass;
     }
 
     
-    public void setEntityClass(Class<? extends BaseEntity> entityClass) {
+    public void setEntityClass(Class<?> entityClass) {
         this.entityClass = entityClass;
     }
 
@@ -94,6 +99,18 @@ public class EntityDefine {
     
     public void setUniqueKeyPropName(String uniqueKeyPropName) {
         this.uniqueKeyPropName = uniqueKeyPropName;
+    }
+
+
+    
+    public String getIdColumnName() {
+        return idColumnName;
+    }
+
+
+    
+    public void setIdColumnName(String idColumnName) {
+        this.idColumnName = idColumnName;
     }
 
 }

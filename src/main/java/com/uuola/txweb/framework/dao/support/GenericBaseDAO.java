@@ -21,11 +21,11 @@ import java.util.Map;
 import org.mybatis.spring.support.SqlSessionDaoSupport;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
 import org.springframework.jdbc.core.RowMapperResultSetExtractor;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.KeyHolder;
@@ -37,7 +37,6 @@ import com.uuola.commons.ObjectUtil;
 import com.uuola.commons.StringUtil;
 import com.uuola.commons.constant.CST_CHAR;
 import com.uuola.commons.exception.Assert;
-import com.uuola.commons.reflect.ClassUtil;
 import com.uuola.txweb.framework.dao.annotation.MapperNamespace;
 
 
@@ -48,9 +47,9 @@ import com.uuola.txweb.framework.dao.annotation.MapperNamespace;
  * 创建日期: 2013-6-15
  * </pre>
  */
-public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDaoSupport {
+public abstract class GenericBaseDAO<T> extends SqlSessionDaoSupport {
 
-    private JdbcTemplate jdbcTemplate;
+    private NamedParameterJdbcTemplate jdbcTemplate;
     
     // 实体类
     private Class<T> entityClass;
@@ -61,41 +60,28 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
     // mybatis mapper 命名空间
     private String mapperNamespace;
     
+    private EntityDefine entityDef;
     
-    public GenericBaseDAO(){
-        setEntityClass();
-        initTableName();
-        initMapperNamespace();
-    }
-
-    public JdbcTemplate getJdbcTemplate() {
-        return jdbcTemplate;
-    }
+    // id或主键列名称
+    private String idColumn;
     
-    public void setJdbcTemplate(JdbcTemplate jdbcTemplate){
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
-    /**
-     * 查询的实体类
-     */
+    private Field idField;
+    
+    // jdbc 结果集转换实体对象映射器
+    private BeanPropertyRowMapper<T> entityPropertyRowMapper;
+    
+    
     @SuppressWarnings("unchecked")
-    private void setEntityClass() {
+    public GenericBaseDAO(){
         ParameterizedType pt = (ParameterizedType) this.getClass().getGenericSuperclass();
-        this.entityClass = (Class<T>) pt.getActualTypeArguments()[0];
-    }
-    
-    /**
-     * 通过实体获取表名
-     */
-    private void initTableName(){
-        this.tableName = ClassUtil.getTableName(this.entityClass);
-    }
-    
-    /**
-     * 根据mapper 命名空间注解获取mapper namespace值
-     */
-    private void initMapperNamespace() {
+        entityClass = (Class<T>) pt.getActualTypeArguments()[0];
+        entityDef = EntityDefManager.getDef(this.entityClass);
+        tableName = entityDef.getTableName();
+        idColumn = entityDef.getIdColumnName();
+        Assert.hasLength(idColumn, "not found idColumn at entity : " + entityClass.getCanonicalName());
+        idField = entityDef.getPropFieldMap().get(entityDef.getUniqueKeyPropName());
+        entityPropertyRowMapper = BeanPropertyRowMapper.newInstance(this.entityClass);
+        // 根据mapper 命名空间注解获取mapper namespace值
         MapperNamespace mapperNamespace = this.getClass().getAnnotation(MapperNamespace.class);
         if (null != mapperNamespace) {
             String namespace = mapperNamespace.value();
@@ -106,6 +92,14 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
                 this.mapperNamespace = namespace;
             }
         }
+    }
+
+    public NamedParameterJdbcTemplate getJdbcTemplate() {
+        return jdbcTemplate;
+    }
+    
+    public void setJdbcTemplate(NamedParameterJdbcTemplate jdbcTemplate){
+        this.jdbcTemplate = jdbcTemplate;
     }
     
     /**
@@ -127,9 +121,9 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @return
      */
     public T get(Serializable id) {
-        String sql = "select * from " + this.tableName + " where " + getIdColumn(this.entityClass) + "=? ";
-        List<T> list = this.jdbcTemplate.query(sql, new Object[] { id },
-                new RowMapperResultSetExtractor<T>(BeanPropertyRowMapper.newInstance(this.entityClass), 1));
+        String sql = "select * from " + this.tableName + " where " + idColumn + "=? ";
+        List<T> list = this.jdbcTemplate.getJdbcOperations().query(sql, new Object[] { id },
+                new RowMapperResultSetExtractor<T>(entityPropertyRowMapper, 1));
         return extractSingleObject(list);
     }
     
@@ -138,15 +132,15 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @param keys 主键集合
      * @return
      */
-    public List<T> getByKeys(List<? extends Serializable> keys) {
+    public List<T> getByKeys(List<?> keys) {
         if(CollectionUtil.isEmpty(keys)){
             return Collections.emptyList();
         }
         int size = keys.size();
-        String sql = "select * from " + this.tableName + " where " + getIdColumn(this.entityClass) + " in ("
+        String sql = "select * from " + this.tableName + " where " + idColumn + " in ("
                 + StringUtil.getPlaceholder(size) + ")";
-        return this.jdbcTemplate.query(sql, keys.toArray(),
-                new RowMapperResultSetExtractor<T>(BeanPropertyRowMapper.newInstance(this.entityClass), size));
+        return this.jdbcTemplate.getJdbcOperations().query(sql, keys.toArray(),
+                new RowMapperResultSetExtractor<T>(entityPropertyRowMapper, size));
     }
     
     /**
@@ -159,10 +153,10 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
             return Collections.emptyList();
         }
         int size = keys.length;
-        String sql = "select * from " + this.tableName + " where " + getIdColumn(this.entityClass) + " in ("
+        String sql = "select * from " + this.tableName + " where " + idColumn + " in ("
                 + StringUtil.getPlaceholder(size) + ")";
-        return this.jdbcTemplate.query(sql, keys,
-                new RowMapperResultSetExtractor<T>(BeanPropertyRowMapper.newInstance(this.entityClass), size));
+        return this.jdbcTemplate.getJdbcOperations().query(sql, keys,
+                new RowMapperResultSetExtractor<T>(entityPropertyRowMapper, size));
     }
     
     /**
@@ -173,21 +167,9 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
     public Number countByProperty(SqlPropValue... findCondits){
         Assert.notEmpty(findCondits);
         String sql = "select count(*) from " + this.tableName + " where ";
-        SqlBuilder sqlBuilder = new SqlBuilder(this.entityClass).where(findCondits);
-        sql += sqlBuilder.getWhereCondition();
-        return this.queryForObject(sql, Number.class, sqlBuilder.getWhereArgs());
-    }
-    
-    /**
-     * 得到主键列名
-     * @param entityClass
-     * @return
-     */
-    public String getIdColumn(Class<? extends BaseEntity> entityClass){
-        EntityDefine entityDef = EntityDefManager.getDef(this.entityClass);
-        String keyPropName = entityDef.getUniqueKeyPropName();
-        Assert.hasLength(keyPropName, "not found uniqueKeyPropName at entity : " + entityClass.getCanonicalName());
-        return entityDef.getPropColumnMap().get(keyPropName);
+        SqlMaker sqlMaker = new SqlMaker(entityDef).where(findCondits);
+        sql += sqlMaker.getWhereCondition();
+        return this.queryForObject(sql, Number.class, sqlMaker.getWhereArgs());
     }
     
     /**
@@ -209,14 +191,13 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      */
     public List<T> findByProperty(String[] selectPropertys, SqlPropValue... findCondits) {
         Assert.notEmpty(findCondits);
-        Map<String, String> propColumnMap = EntityDefManager.getDef(this.entityClass).getPropColumnMap();
+        Map<String, String> propColumnMap = entityDef.getPropColumnMap();
         String queryColumn = ObjectUtils.isEmpty(selectPropertys) ? " * " : getQueryColumn(selectPropertys,
                 propColumnMap);
         String sql = "select " + queryColumn + " from " + this.tableName + " where ";
-        SqlBuilder sqlBuilder = new SqlBuilder(this.entityClass).where(findCondits);
-        sql += sqlBuilder.getWhereCondition();
-        return this.jdbcTemplate.query(sql, sqlBuilder.getWhereArgs(),
-                BeanPropertyRowMapper.newInstance(this.entityClass));
+        SqlMaker sqlMaker = new SqlMaker(entityDef).where(findCondits);
+        sql += sqlMaker.getWhereCondition();
+        return this.jdbcTemplate.getJdbcOperations().query(sql, sqlMaker.getWhereArgs(), entityPropertyRowMapper);
     }
 
     /**
@@ -247,8 +228,8 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @return
      */
     public int deleteById(Serializable id){
-        String sql = "delete from " +  this.tableName +" where "+getIdColumn(this.entityClass)+"=? ";
-        return this.jdbcTemplate.update(sql, id);
+        String sql = "delete from " +  this.tableName +" where "+idColumn+"=? ";
+        return this.jdbcTemplate.getJdbcOperations().update(sql, id);
     }
     
     /**
@@ -257,9 +238,9 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @return
      */
     public int deleteByKeys(Object... keys) {
-        String sql = "delete from " + this.tableName + " where " + getIdColumn(this.entityClass) + " in ( "
+        String sql = "delete from " + this.tableName + " where " + idColumn + " in ( "
                 + StringUtil.getPlaceholder(keys.length) + ")";
-        return this.jdbcTemplate.update(sql, keys);
+        return this.jdbcTemplate.getJdbcOperations().update(sql, keys);
     }
     
     /**
@@ -268,8 +249,8 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @return
      */
     public int deleteByEntity(T entity){
-        SqlBuilder sqlBuilder = new SqlBuilder(entity).build();
-        return this.update(sqlBuilder.getDeleteSql(), sqlBuilder.getSqlParams());
+        SqlMaker sqlMaker = new SqlMaker(entityDef).build(entity);
+        return this.update(sqlMaker.getDeleteSql(), sqlMaker.getSqlParams());
     }
     
     /**
@@ -280,10 +261,10 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      */
     public int delete(SqlPropValue... findCondits) {
         String sql = "delete from " + this.tableName + " where ";
-        SqlBuilder sqlBuilder = new SqlBuilder(this.entityClass).where(findCondits);
-        Object[] args = sqlBuilder.getWhereArgs();
+        SqlMaker sqlMaker = new SqlMaker(entityDef).where(findCondits);
+        Object[] args = sqlMaker.getWhereArgs();
         Assert.notEmpty(args);
-        return this.update(sql + sqlBuilder.getWhereCondition(), args);
+        return this.update(sql + sqlMaker.getWhereCondition(), args);
     }
 
     /**
@@ -293,7 +274,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @return
      */
     public int update(String sql, List<?> params) {
-        return jdbcTemplate.update(getPreparedStatementCreatorFactory(sql, params)
+        return jdbcTemplate.getJdbcOperations().update(getPreparedStatementCreatorFactory(sql, params)
                 .newPreparedStatementCreator(params));
     }
     
@@ -304,7 +285,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @return
      */
     public int update(String sql, Object... params){
-        return this.jdbcTemplate.update(sql, params);
+        return this.jdbcTemplate.getJdbcOperations().update(sql, params);
     }
     
     /**
@@ -313,8 +294,8 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @return 
      */
     public int update(T entity){
-        SqlBuilder sqlBuilder = new SqlBuilder(entity).build();
-        return update(sqlBuilder);
+        SqlMaker sqlMaker = new SqlMaker(entityDef).build(entity);
+        return update(sqlMaker);
     }
     
     /**
@@ -322,8 +303,8 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @param entity
      * @return 
      */
-    public int update(SqlBuilder sqlBuilder){
-        return this.update(sqlBuilder.getUpdateSql(), sqlBuilder.getSqlParams());
+    public int update(SqlMaker sqlMaker){
+        return this.update(sqlMaker.getUpdateSql(), sqlMaker.getSqlParams());
     }
 
     
@@ -332,14 +313,11 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @param entity 
      */
     public void save(T entity){
-        SqlBuilder sqlBuilder = new SqlBuilder(entity).build();
-        Number id = this.saveReturnKey(sqlBuilder.getInsertSql(), sqlBuilder.getSqlParams());
+        SqlMaker sqlMaker = new SqlMaker(entityDef).build(entity);
+        Number id = this.saveReturnKey(sqlMaker.getInsertSql(), sqlMaker.getSqlParams());
         if (null != id) {
-            Field idField = ReflectionUtils.findField(entity.getClass(), "id");
             Assert.notNull(idField, "The id Field, Not found in [" + entity.getClass().getCanonicalName() + "]");
-            ReflectionUtils.makeAccessible(idField);
-            Object idValue = getIdValueByNumber(id, idField.getType());
-            ReflectionUtils.setField(idField, entity, idValue);
+            ReflectionUtils.setField(idField, entity, getIdValueByNumber(id, idField.getType()));
         }
     }
     
@@ -369,7 +347,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
         pscFactory.setReturnGeneratedKeys(true);// return auto-GenerateKey
         KeyHolder keyHolder = new GeneratedKeyHolder();
         PreparedStatementCreator psc = pscFactory.newPreparedStatementCreator(params);
-        jdbcTemplate.update(psc, keyHolder);
+        jdbcTemplate.getJdbcOperations().update(psc, keyHolder);
         return keyHolder.getKey();
     }
     
@@ -439,7 +417,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @return
      */
     public Map<String, Object> queryForMap(String sql, Object... params) {
-        List<Map<String, Object>> results = this.jdbcTemplate.query(sql, params,
+        List<Map<String, Object>> results = this.jdbcTemplate.getJdbcOperations().query(sql, params,
                 new RowMapperResultSetExtractor<Map<String, Object>>(new ColumnMapRowMapper(), 1));
         return extractSingleObject(results);
     }
@@ -467,7 +445,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @return
      */
     public <E> E queryForObject(String sql, Class<E> requiredType, Object... params) {
-        List<E> results = this.jdbcTemplate.query(sql, params,
+        List<E> results = this.jdbcTemplate.getJdbcOperations().query(sql, params,
                 new RowMapperResultSetExtractor<E>(new SingleColumnRowMapper<E>(requiredType)));
         return extractSingleObject(results);
     }
@@ -490,7 +468,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @throws SQLException 
      */
     public List<Map<String, Object>> executeQuery(String sql, Object... params){
-        return this.jdbcTemplate.queryForList(sql, params);
+        return this.jdbcTemplate.getJdbcOperations().queryForList(sql, params);
     }
     
     /**
@@ -501,7 +479,7 @@ public abstract class GenericBaseDAO<T extends BaseEntity> extends SqlSessionDao
      * @return
      */
     public <E> List<E> executeQuery(String sql, Class<E> clazz, Object... params ){
-        return this.jdbcTemplate.query(sql, params, BeanPropertyRowMapper.newInstance(clazz));
+        return this.jdbcTemplate.getJdbcOperations().query(sql, params, BeanPropertyRowMapper.newInstance(clazz));
     }
     
 

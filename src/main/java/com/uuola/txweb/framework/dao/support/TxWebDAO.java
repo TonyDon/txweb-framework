@@ -9,7 +9,7 @@ package com.uuola.txweb.framework.dao.support;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 
 /**
@@ -19,7 +19,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
  * 创建日期: 2013-10-5
  * </pre>
  */
-public class TxWebDAO<T extends BaseEntity>  extends GenericBaseDAO<T> {
+public class TxWebDAO<T>  extends GenericBaseDAO<T> {
 
     @Autowired
     public void initSessionFactory(
@@ -29,7 +29,7 @@ public class TxWebDAO<T extends BaseEntity>  extends GenericBaseDAO<T> {
 
     @Autowired
     public void initJdbcTemplate(
-            @Qualifier(DBQualifiers.TXWEB_JDBC_TEMPLATE) JdbcTemplate jdbcTemplate) {
+            @Qualifier(DBQualifiers.TXWEB_JDBC_TEMPLATE) NamedParameterJdbcTemplate jdbcTemplate) {
         super.setJdbcTemplate(jdbcTemplate);
     }
 }

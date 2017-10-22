@@ -9,6 +9,7 @@ package com.uuola.txweb.framework.dao.support;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.Table;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,11 +53,11 @@ public class EntityClassLoader {
         }
     }
     
-    @SuppressWarnings("unchecked")
     private void invokeEntityDefManagerAdd(Set<Class<?>> entityClasses) {
         for(Class<?> entityClazz : entityClasses){
-            if (BaseEntity.class.isAssignableFrom(entityClazz)) {
-                EntityDefManager.addEntityClass(((Class<? extends BaseEntity>) entityClazz));
+            Table table = entityClazz.getAnnotation(Table.class);
+            if (null != table) {
+                EntityDefManager.addEntityClass(entityClazz);
             }
         }
     }

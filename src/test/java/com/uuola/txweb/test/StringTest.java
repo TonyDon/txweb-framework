@@ -11,7 +11,7 @@ import com.uuola.commons.JsonUtil;
 import com.uuola.commons.ObjectUtil;
 import com.uuola.commons.StringUtil;
 import com.uuola.commons.constant.CST_REGEX;
-import com.uuola.txweb.framework.dao.support.SqlBuilder;
+import com.uuola.txweb.framework.dao.support.SqlMaker;
 
 
 public class StringTest {

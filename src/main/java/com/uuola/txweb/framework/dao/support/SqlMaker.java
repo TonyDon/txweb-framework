@@ -28,15 +28,13 @@ import com.uuola.commons.reflect.FieldUtil;
  * 创建日期: 2013-8-4
  * </pre>
  */
-public class SqlBuilder{
+public class SqlMaker{
     
     private String tableName;
     
     private List<String> sqlColumns;
             
     private List<Object> sqlParams;
-    
-    private BaseEntity entity;
     
     /**
      * 唯一字段名
@@ -48,32 +46,22 @@ public class SqlBuilder{
      */
     private Object uniqueColValue;
     
-    private Class<? extends BaseEntity> entityClass;
-    
     private String whereCondition;
     
     private Object[] whereArgs;
     
-    public SqlBuilder(){
-        
-    }
+    private EntityDefine entityDef;
     
-    public SqlBuilder(Class<? extends BaseEntity> entityClass){
-        this.entityClass = entityClass;
-    }
-    
-    public SqlBuilder(BaseEntity entity){
-        this.entity = entity;
+    public SqlMaker(EntityDefine entityDef){
+        this.entityDef = entityDef;
     }
     
     /**
      * 通过实体类构建SQL所需参数<br/>
      * 主键与非主键字段分别存储
      */
-    public SqlBuilder build() {
-        Assert.notNull(this.entity, "Entity must not be null!");
-        this.entityClass = (Class<? extends BaseEntity>)entity.getClass();
-        EntityDefine entityDef = EntityDefManager.getDef(this.entityClass);
+    public SqlMaker build(Object entity) {
+        Assert.notNull(entity, "Entity must not be null!");
         this.tableName = entityDef.getTableName();
         Map<String, Field> propNameFieldMap = entityDef.getPropFieldMap();
         Map<String, String> propNameColumnMap = entityDef.getPropColumnMap();
@@ -126,7 +114,7 @@ public class SqlBuilder{
         Assert.notNull(this.uniqueColName, "uniqueColName must not be null!");
         Assert.notNull(this.uniqueColValue, "uniqueColValue must not be null!");
         StringBuilder sql = new StringBuilder("UPDATE ");
-        sql.append(this.getTableName()).append(" SET ");
+        sql.append(this.tableName).append(" SET ");
         int colCount = sqlColumns.size();
         int lastColIndex = colCount - 1;
         for (int k = 0; k < lastColIndex; k++) {
@@ -144,7 +132,7 @@ public class SqlBuilder{
      */
     public String getDeleteSql() {
         StringBuilder sql = new StringBuilder("DELETE FROM ");
-        sql.append(this.getTableName()).append(" WHERE ");
+        sql.append(this.tableName).append(" WHERE ");
         if (StringUtil.isNotEmpty(uniqueColName) && null != uniqueColValue) {
             // 添加主键列名 和值
             sqlColumns.clear();
@@ -167,17 +155,16 @@ public class SqlBuilder{
      * @param findCondits
      * @return
      */
-    public SqlBuilder where(SqlPropValue... findCondits) {
+    public SqlMaker where(SqlPropValue... findCondits) {
         Object[] valueArgs = null;
         int conditsCount = findCondits.length;
-        Class<? extends BaseEntity> clazz = null == entity ? this.entityClass : (Class<? extends BaseEntity>) entity
-                .getClass();
-        Map<String, String> propColumnMap = EntityDefManager.getDef(clazz).getPropColumnMap();
+        Class<?> clazz = entityDef.getEntityClass();
+        Map<String, String> propColumnMap = entityDef.getPropColumnMap();
         // where ...
         StringBuilder sql = new StringBuilder();
         if (1 == conditsCount) {
             SqlPropValue pv = findCondits[0];
-            sql.append(SqlBuilder.makeProperySqlFragment(clazz, propColumnMap, pv));
+            sql.append(SqlMaker.makeProperySqlFragment(clazz, propColumnMap, pv));
             valueArgs = ObjectUtil.getArgsArray(pv.getValue());
 
         } else {
@@ -185,7 +172,7 @@ public class SqlBuilder{
             for (int k = 0; k < conditsCount; k++) {
                 SqlPropValue pv = findCondits[k];
 
-                sql.append(SqlBuilder.makeProperySqlFragment(clazz, propColumnMap, pv));
+                sql.append(SqlMaker.makeProperySqlFragment(clazz, propColumnMap, pv));
                 params[k] = pv.getValue();
 
                 // AND , OR;
@@ -206,7 +193,7 @@ public class SqlBuilder{
      * @param propColumnMap
      * @param pv
      */
-    public static StringBuilder makeProperySqlFragment(Class<? extends BaseEntity> entityClass,
+    public static StringBuilder makeProperySqlFragment(Class<?> entityClass,
             Map<String, String> propColumnMap, SqlPropValue pv) {
         String columnName = propColumnMap.get(pv.getPropertyName());
         Assert.hasLength(columnName, entityClass.getCanonicalName() + "." + pv.getPropertyName()
@@ -214,7 +201,7 @@ public class SqlBuilder{
         StringBuilder sql = new StringBuilder();
         Object value = pv.getValue();
         Assert.notNull(value);
-        int placeNum = SqlBuilder.getSqlPlaceholderCount(value);
+        int placeNum = SqlMaker.getSqlPlaceholderCount(value);
         boolean isMultipleParam = placeNum > 1;
         sql.append("(");
         sql.append(columnName);
@@ -288,16 +275,6 @@ public class SqlBuilder{
     }
 
     
-    public BaseEntity getEntity() {
-        return entity;
-    }
-
-    
-    public void setEntity(BaseEntity entity) {
-        this.entity = entity;
-    }
-
-    
     public String getUniqueColName() {
         return uniqueColName;
     }
@@ -346,16 +323,4 @@ public class SqlBuilder{
     public void setWhereArgs(Object[] whereArgs) {
         this.whereArgs = whereArgs;
     }
-
-    
-    public Class<? extends BaseEntity> getEntityClass() {
-        return entityClass;
-    }
-
-    
-    public void setEntityClass(Class<? extends BaseEntity> entityClass) {
-        this.entityClass = entityClass;
-    }
-    
-    
 }

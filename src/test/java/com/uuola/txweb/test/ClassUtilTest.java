@@ -23,7 +23,7 @@ import com.uuola.commons.reflect.ClassUtil;
 import com.uuola.commons.reflect.FieldUtil;
 import com.uuola.txweb.framework.action.BaseAction;
 import com.uuola.txweb.framework.dao.support.BaseEntity;
-import com.uuola.txweb.framework.dao.support.SqlBuilder;
+import com.uuola.txweb.framework.dao.support.SqlMaker;
 
 
 /**
@@ -63,7 +63,7 @@ public class ClassUtilTest {
         de.setCode("000000123");
         de.setGender((byte)1);
         de.setBirthday(new Date());
-        SqlBuilder sqlBuilder = new SqlBuilder(de).build();
+        SqlMaker sqlBuilder = new SqlMaker(de).build();
         System.out.println(ReflectionUtils.findField(DemoEntity.class, "code").getType().getName());
         System.out.println(sqlBuilder.getInsertSql());
         System.out.println(sqlBuilder.getUpdateSql());

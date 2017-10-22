@@ -18,7 +18,6 @@ import javax.persistence.Id;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.uuola.commons.CollectionUtil;
 import com.uuola.commons.StringUtil;
 import com.uuola.commons.exception.Assert;
 import com.uuola.commons.reflect.ClassUtil;
@@ -37,28 +36,28 @@ public class EntityDefManager {
     
     private static Logger log = LoggerFactory.getLogger(EntityDefManager.class);
 
-    private static ConcurrentMap<Class<? extends BaseEntity>, EntityDefine> entityPropContainer = new ConcurrentHashMap<Class<? extends BaseEntity>, EntityDefine>();
+    private static ConcurrentMap<Class<?>, EntityDefine> entityPropContainer = new ConcurrentHashMap<Class<?>, EntityDefine>();
 
-    public static EntityDefine addEntityClass(Class<? extends BaseEntity> clazz) {
+    public static EntityDefine addEntityClass(Class<?> clazz) {
         EntityDefine defBean = entityPropContainer.get(clazz);
         if (null == defBean) {
             defBean = resolveEntityClass(clazz);
             entityPropContainer.putIfAbsent(clazz, defBean);
             log.info("add entity class def bean to manager : " + clazz.getCanonicalName());
+            defBean = entityPropContainer.get(clazz);
         }
         return defBean;
     }
     
-    public static EntityDefine getDef(Class<? extends BaseEntity> clazz){
+    public static EntityDefine getDef(Class<?> clazz){
         return addEntityClass(clazz);
     }
 
-    private static EntityDefine resolveEntityClass(Class<? extends BaseEntity> clazz) {
+    private static EntityDefine resolveEntityClass(Class<?> clazz) {
         EntityDefine defBean = new EntityDefine();
         defBean.setEntityClass(clazz);
         defBean.setTableName(ClassUtil.getTableName(clazz));
-        Map<String, Field> propFieldMap = FieldUtil.getAllAccessibleFieldNameMap(defBean.getEntityClass(),
-                BaseEntity.class);
+        Map<String, Field> propFieldMap = FieldUtil.getAllAccessibleFieldNameMap(defBean.getEntityClass());
         Assert.notEmpty(propFieldMap);
         defBean.setPropFieldMap(propFieldMap);
         Map<String, String> propColumnMap = getPropertyColumnMap(defBean);
@@ -74,8 +73,7 @@ public class EntityDefManager {
      */
     private  static Map<String, String> getPropertyColumnMap(EntityDefine defBean) {
         Map<String, Field> propFieldMap = defBean.getPropFieldMap();
-        Map<String, String> propColumnMap = new HashMap<String, String>(CollectionUtil.preferedMapSize(propFieldMap
-                .size()));
+        Map<String, String> propColumnMap = new HashMap<String, String>();
         boolean isFoundIdColumn = false;
         for (Map.Entry<String, Field> entry : propFieldMap.entrySet()) {
             String propName = entry.getKey();
@@ -96,9 +94,12 @@ public class EntityDefManager {
                 if (null != id) {
                     isFoundIdColumn = true;
                     // 如果 @Id标注主键没有被@Column标注，则自动转换属性列名关系
-                    if (null == propColumnMap.get(propName)) {
-                        propColumnMap.put(propName, propName.equalsIgnoreCase("id") ? "id" : StringUtil.getUnderscoreName(propName));
+                    String idColumnName = colName;
+                    if (null == colName) {
+                        idColumnName = propName.equalsIgnoreCase("id") ? "id" : StringUtil.getUnderscoreName(propName);
+                        propColumnMap.put(propName, idColumnName);
                     }
+                    defBean.setIdColumnName(idColumnName);
                     defBean.setUniqueKeyPropName(propName);
                 }
             }

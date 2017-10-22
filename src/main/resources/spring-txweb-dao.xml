@@ -66,7 +66,7 @@
 		<constructor-arg ref="txwebfw_sqlSessionFactory" />
 	</bean>
 
-	<bean id="txwebJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+	<bean id="txwebJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
 		<qualifier value="txwebJdbcTemplate" />
 		<constructor-arg ref="txwebfw_ds" />
 	</bean>

@@ -12,7 +12,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java-version>1.7</java-version>
-		<org.springframework-version>4.3.10.RELEASE</org.springframework-version>
+		<org.springframework-version>4.3.12.RELEASE</org.springframework-version>
 		<org.aspectj-version>1.6.10</org.aspectj-version>
 		<com.thoughtworks.xstream-version>1.4.3</com.thoughtworks.xstream-version>
 		<!-- mybatis 3.4+配合 mybatis-spring 1.3.0+ 使用 且在tomcat8+可用 -->
